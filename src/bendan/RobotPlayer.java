@@ -226,11 +226,11 @@ public strictfp class RobotPlayer {
 					 rnd.nextDouble() < .03) {
 					 rc.buildRobot(RobotType.SOLDIER, dir);
 					 } else
-					// if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) &&
-					// rnd.nextDouble() < .02 && rc.isBuildReady()) {
-					// rc.buildRobot(RobotType.LUMBERJACK, dir);
-					// }
-					// else
+					 if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) &&
+					 rnd.nextDouble() < .02 && rc.isBuildReady()) {
+					 rc.buildRobot(RobotType.LUMBERJACK, dir);
+					 }
+					 else
 						 if (rc.canBuildRobot(RobotType.SCOUT, dir) &&
 					 rnd.nextDouble() < .01 && rc.isBuildReady()) {
 					 rc.buildRobot(RobotType.SCOUT, dir);
