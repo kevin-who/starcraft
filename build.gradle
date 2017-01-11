@@ -86,6 +86,7 @@ idea {
         downloadJavadoc = true
     }
 }
+
 // Default configuration for running matches.
 if (!project.hasProperty("teamA")) {
     ext.teamA = "examplefuncsplayer"
@@ -138,8 +139,8 @@ task run(type: JavaExec, dependsOn: 'build') {
         '-Dbc.server.map-path=maps',
         '-Dbc.server.debug=true',
         '-Dbc.engine.debug-methods=true',
-        '-Dbc.game.team-a=cheese',
-        '-Dbc.game.team-b=jinchao',
+        '-Dbc.game.team-a='+project.property('teamA'),
+        '-Dbc.game.team-b='+project.property('teamA'),
         '-Dbc.game.team-a.url='+sourceSets.main.output.classesDir,
         '-Dbc.game.team-b.url='+sourceSets.main.output.classesDir,
         '-Dbc.game.maps=SparseForest',
