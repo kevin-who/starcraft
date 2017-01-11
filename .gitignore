@@ -17,6 +17,7 @@
 *.ipr
 *.iws
 /.idea/
+/client/
 
 
 # User-specific stuff:
