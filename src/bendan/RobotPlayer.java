@@ -112,11 +112,13 @@ public strictfp class RobotPlayer {
 				Direction dir = randomDirection();
 
 				// Randomly attempt to build a gardener in this direction
-				if (rc.canHireGardener(dir) && (rnd.nextDouble() < .01 || rc.getRoundNum() < 200)) {
+				if (rc.canHireGardener(dir) && (rnd.nextDouble() < .02 || rc.getRoundNum() < 200)) {
 					if (rc.canHireGardener(dir))
 						rc.hireGardener(dir);
 				}
-
+				if(!rc.hasMoved())
+					tryMove(dir.opposite());
+				
 				if (rc.getRoundLimit() - rc.getRoundNum() < 750) {
 					if (rc.getTeamBullets() > 60)
 						rc.donate(20);
@@ -164,18 +166,6 @@ public strictfp class RobotPlayer {
 				Direction dir = randomDirection();
 				ti = rc.senseNearbyTrees(-1, rc.getTeam());
 
-				if (ti.length < 5 && rc.canPlantTree(dir) && (rc.getRoundNum() < 125 || rnd.nextDouble() < .03)) {
-					rc.plantTree(dir);
-				} else if (rc.canBuildRobot(RobotType.SOLDIER, dir) && rnd.nextDouble() < .02) {
-					rc.buildRobot(RobotType.SOLDIER, dir);
-				} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && rnd.nextDouble() < .02 && rc.isBuildReady()) {
-					rc.buildRobot(RobotType.LUMBERJACK, dir);
-				} else if (rc.canBuildRobot(RobotType.SCOUT, dir) && rnd.nextDouble() < .01 && rc.isBuildReady()) {
-					rc.buildRobot(RobotType.SCOUT, dir);
-				} else if (rc.canBuildRobot(RobotType.TANK, dir) && rnd.nextDouble() < .01 && rc.isBuildReady()) {
-					rc.buildRobot(RobotType.TANK, dir);
-				}
-
 				float min = 50f;
 				for (TreeInfo t : ti) {
 					if (t.health < min) {
@@ -189,6 +179,20 @@ public strictfp class RobotPlayer {
 				// Move randomly
 				if (!rc.hasMoved())
 					tryMove(dir);
+
+				dir = randomDirection();
+				if (rc.canPlantTree(dir) && (rc.getRoundNum() < 125 || rnd.nextDouble() < .015)) {
+					rc.plantTree(dir);
+				} else if (rc.canBuildRobot(RobotType.SOLDIER, dir) && rnd.nextDouble() < .02) {
+					rc.buildRobot(RobotType.SOLDIER, dir);
+				} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && rnd.nextDouble() < .015
+						&& rc.isBuildReady()) {
+					rc.buildRobot(RobotType.LUMBERJACK, dir);
+				} else if (rc.canBuildRobot(RobotType.SCOUT, dir) && rnd.nextDouble() < .01 && rc.isBuildReady()) {
+					rc.buildRobot(RobotType.SCOUT, dir);
+				} else if (rc.canBuildRobot(RobotType.TANK, dir) && rnd.nextDouble() < .01 && rc.isBuildReady()) {
+					rc.buildRobot(RobotType.TANK, dir);
+				}
 
 				// Clock.yield() makes the robot wait until the next turn, then
 				// it will perform this loop again
@@ -245,9 +249,12 @@ public strictfp class RobotPlayer {
 
 					Direction d = randomDirection();
 					try {
-						if (rc.readBroadcast(2) >= rc.getRoundNum() - 1) {
+						if (rc.readBroadcast(2) != 0) {
 							int x = rc.readBroadcast(3);
 							int y = rc.readBroadcast(4);
+							if(myLocation.isWithinDistance(new MapLocation(x,y),5)){
+								rc.broadcast(2,0);
+							}
 							d = new Direction(x - myLocation.x, y - myLocation.y);
 						}
 					} catch (GameActionException e) {
@@ -307,9 +314,12 @@ public strictfp class RobotPlayer {
 
 					Direction d = randomDirection();
 					try {
-						if (rc.readBroadcast(2) >= rc.getRoundNum() - 1) {
+						if (rc.readBroadcast(2) != 0) {
 							int x = rc.readBroadcast(3);
 							int y = rc.readBroadcast(4);
+							if(myLocation.isWithinDistance(new MapLocation(x,y),5)){
+								rc.broadcast(2,0);
+							}
 							d = new Direction(x - myLocation.x, y - myLocation.y);
 							tryMove(d);
 							if (rc.canFireSingleShot()) {
@@ -337,8 +347,6 @@ public strictfp class RobotPlayer {
 		System.out.println("I'm an scout!");
 		Team enemy = rc.getTeam().opponent();
 		Direction d = randomDirection();
-		int count = 0;
-		boolean reset = false;
 
 		// The code you want your robot to perform every round should be in this
 		// loop
@@ -359,9 +367,6 @@ public strictfp class RobotPlayer {
 					MapLocation enemyLocation = robots[0].getLocation();
 					Direction toEnemy = myLocation.directionTo(enemyLocation);
 
-					if (rc.canFireSingleShot()) {
-						rc.fireSingleShot(toEnemy);
-					}
 					rc.broadcast(2, rc.getRoundNum());
 					rc.broadcast(3, (int) enemyLocation.x);
 					rc.broadcast(4, (int) enemyLocation.y);
@@ -375,19 +380,12 @@ public strictfp class RobotPlayer {
 				} else {
 
 					if (!rc.hasMoved())
-						if(!tryMove(d)){
-							count =0;
+						if (!tryMove(d, 0, 0)) {
 							d = randomDirection();
-						}else{
-							count++;
-							if(count>20){
-								count =0;
-								d = randomDirection();
-							}
-						}
-					
+						} 
+
 				}
-				
+
 				// Clock.yield() makes the robot wait until the next turn, then
 				// it will perform this loop again
 				Clock.yield();
@@ -443,9 +441,12 @@ public strictfp class RobotPlayer {
 					} else if (!rc.hasMoved()) {
 						Direction d = randomDirection();
 
-						if (rc.readBroadcast(2) >= rc.getRoundNum() - 1) {
+						if (rc.readBroadcast(2) != 0) {
 							int x = rc.readBroadcast(3);
 							int y = rc.readBroadcast(4);
+							if(myLocation.isWithinDistance(new MapLocation(x,y),5)){
+								rc.broadcast(2,0);
+							}
 							d = new Direction(x - myLocation.x, y - myLocation.y);
 						}
 						tryMove(d);
