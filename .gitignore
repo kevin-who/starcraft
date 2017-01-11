@@ -27,3 +27,4 @@ battlecode-scaffold.iws
 .classpath
 .project
 .settings/
+build.gradle
