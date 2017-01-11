@@ -18,6 +18,7 @@
 *.iws
 /.idea/
 /client/
+*.gradle
 
 
 # User-specific stuff:
@@ -27,4 +28,3 @@ battlecode-scaffold.iws
 .classpath
 .project
 .settings/
-build.gradle
