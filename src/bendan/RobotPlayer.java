@@ -133,6 +133,9 @@ public strictfp class RobotPlayer {
 				}
 				if (rc.getTeamBullets() > 600)
 					rc.donate(100);
+				if(rc.getTeamBullets()>10000){
+					rc.donate(10000);
+				}
 
 				// Clock.yield() makes the robot wait until the next turn, then
 				// it will perform this loop again
@@ -455,12 +458,27 @@ public strictfp class RobotPlayer {
 				RobotInfo[] robots = rc.senseNearbyRobots(
 						RobotType.LUMBERJACK.bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS, enemy);
 
-				if (robots.length > 0 && !rc.hasAttacked()) {
-					// Use strike() to hit all nearby robots!
-					rc.strike();
-					rc.broadcast(2, rc.getRoundNum());
-					rc.broadcast(3, (int) myLocation.x);
-					rc.broadcast(4, (int) myLocation.y);
+				TreeInfo[] trees = rc.senseNearbyTrees();
+
+				if (trees.length > 0) {
+					int closest_index=0;
+					float mindist=10000000;
+					for (int x = 0; x < trees.length; x++) {
+						TreeInfo this_tree = trees[x];
+						if (this_tree.getTeam() != rc.getTeam()) {
+							float distance_to = myLocation.distanceSquaredTo(this_tree.location);
+							if (mindist<distance_to) {
+								closest_index = x;
+								mindist = distance_to;
+							}
+							if (rc.canChop(this_tree.ID)) {
+								rc.chop(this_tree.ID);
+							}
+						}
+					}
+					if(!rc.hasMoved()) {
+						tryMove(myLocation.directionTo(trees[closest_index].location));
+					}
 				} else {
 					// No close robots, so search for robots within sight radius
 					robots = rc.senseNearbyRobots(-1, enemy);
@@ -468,6 +486,13 @@ public strictfp class RobotPlayer {
 					// If there is a robot, move towards it
 
 					if (robots.length > 0) {
+						if (!rc.hasAttacked()){
+							// Use strike() to hit all nearby robots!
+							rc.strike();
+							rc.broadcast(2, rc.getRoundNum());
+							rc.broadcast(3, (int) myLocation.x);
+							rc.broadcast(4, (int) myLocation.y);
+						}
 						MapLocation enemyLocation = robots[0].getLocation();
 						Direction toEnemy = myLocation.directionTo(enemyLocation);
 						rc.broadcast(2, rc.getRoundNum());
@@ -479,20 +504,8 @@ public strictfp class RobotPlayer {
 
 						if (!rc.hasMoved()) {
 
-							TreeInfo[] trees = rc.senseNearbyTrees();
 							Direction d = randomDirection();
-
-							if (trees.length > 0) {
-								for (int x = 0; x < trees.length; x++) {
-									if (trees[x].getTeam() != rc.getTeam()) {
-										d = myLocation.directionTo(trees[x].location);
-										if (rc.canChop(trees[x].ID)) {
-											rc.chop(trees[x].ID);
-											break;
-										}
-									}
-								}
-							} else if (rc.readBroadcast(2) != 0) {
+							if (rc.readBroadcast(2) != 0) {
 								int x = rc.readBroadcast(3);
 								int y = rc.readBroadcast(4);
 								if (myLocation.isWithinDistance(new MapLocation(x, y), 5)) {
