@@ -19,6 +19,7 @@
 /.idea/
 /client/
 *.gradle
+build.gradle
 
 
 # User-specific stuff:
