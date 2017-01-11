@@ -218,17 +218,19 @@ public strictfp class RobotPlayer {
 
 				} else {
 					 if (rc.canBuildRobot(RobotType.SOLDIER, dir) &&
-					 rnd.nextDouble() < .015) {
+					 rnd.nextDouble() < .03) {
 					 rc.buildRobot(RobotType.SOLDIER, dir);
 					 } else
-					if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && rnd.nextDouble() < .02 && rc.isBuildReady()) {
-						rc.buildRobot(RobotType.LUMBERJACK, dir);
-					}
-					 else if (rc.canBuildRobot(RobotType.SCOUT, dir) &&
+					// if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) &&
+					// rnd.nextDouble() < .02 && rc.isBuildReady()) {
+					// rc.buildRobot(RobotType.LUMBERJACK, dir);
+					// }
+					// else
+						 if (rc.canBuildRobot(RobotType.SCOUT, dir) &&
 					 rnd.nextDouble() < .01 && rc.isBuildReady()) {
 					 rc.buildRobot(RobotType.SCOUT, dir);
 					 } else if (rc.canBuildRobot(RobotType.TANK, dir) &&
-					 rnd.nextDouble() < .01 && rc.isBuildReady()) {
+					 rnd.nextDouble() < .02 && rc.isBuildReady()) {
 					 rc.buildRobot(RobotType.TANK, dir);
 					 }
 				}
@@ -276,8 +278,8 @@ public strictfp class RobotPlayer {
 						tryMove(toEnemy.opposite());
 					}
 					int d = (int) myLocation.distanceTo(enemyLocation);
-					if (rc.canFirePentadShot())
-						rc.firePentadShot(toEnemy);
+					if (rc.canFireSingleShot())
+						rc.fireSingleShot(toEnemy);
 					
 
 				} else {
