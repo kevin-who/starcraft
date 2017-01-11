@@ -131,11 +131,13 @@ public strictfp class RobotPlayer {
 					if (rc.getTeamBullets() > 60)
 						rc.donate(20);
 				}
-				if (rc.getTeamBullets() > 600)
-					rc.donate(100);
+				
 				if(rc.getTeamBullets()>10000){
 					rc.donate(10000);
 				}
+				if (rc.getTeamBullets() > 600)
+					rc.donate(100);
+				
 
 				// Clock.yield() makes the robot wait until the next turn, then
 				// it will perform this loop again
