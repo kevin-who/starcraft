@@ -27,24 +27,24 @@ public strictfp class RobotPlayer {
 		FastMath.initRand(rc);
 
 		switch (rc.getType()) {
-			case ARCHON:
-				runArchon();
-				break;
-			case GARDENER:
-				runGardener();
-				break;
-			case SOLDIER:
-				runSoldier();
-				break;
-			case LUMBERJACK:
-				runLumberjack();
-				break;
-			case TANK:
-				runTank();
-				break;
-			case SCOUT:
-				runScout();
-				break;
+		case ARCHON:
+			runArchon();
+			break;
+		case GARDENER:
+			runGardener();
+			break;
+		case SOLDIER:
+			runSoldier();
+			break;
+		case LUMBERJACK:
+			runLumberjack();
+			break;
+		case TANK:
+			runTank();
+			break;
+		case SCOUT:
+			runScout();
+			break;
 		}
 	}
 
@@ -138,13 +138,12 @@ public strictfp class RobotPlayer {
 		System.out.println("I'm a gardener!");
 
 		Team enemy = rc.getTeam().opponent();
-		int tree = 0;
 		Direction dir = randomDirection();
 		while (true) {
 			// Try/catch blocks stop unhandled exceptions, which cause your
 			// robot to explode
 			try {
-				if (rc.senseNearbyRobots(5f).length <= 1 && rc.canPlantTree(dir)
+				if (rc.senseNearbyRobots(4f).length < 1 && rc.canPlantTree(dir)
 						&& rc.canPlantTree(dir.rotateLeftRads(60)) && rc.canPlantTree(dir.rotateLeftRads(120))
 						&& rc.canPlantTree(dir.rotateLeftRads(180)) && rc.canPlantTree(dir.rotateLeftRads(240))
 						&& rc.canPlantTree(dir.rotateLeftRads(300)))
@@ -153,7 +152,7 @@ public strictfp class RobotPlayer {
 				if (rc.getTeamBullets() > 50 && !rc.hasMoved())
 					if (!tryMove(dir, 0, 0)) {
 						dir = dir.opposite();
-						if (rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0 && rc.senseNearbyRobots(5f).length <= 1) {
+						if (rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0 && rc.senseNearbyRobots(3f).length < 1) {
 							if (rc.canBuildRobot(RobotType.LUMBERJACK, dir)) {
 								rc.buildRobot(RobotType.LUMBERJACK, dir);
 								break;
@@ -170,9 +169,7 @@ public strictfp class RobotPlayer {
 								break;
 							}
 							dir = randomDirection();
-
 						}
-
 					}
 
 				// Clock.yield() makes the robot wait until the next turn,
@@ -192,7 +189,7 @@ public strictfp class RobotPlayer {
 		TreeInfo[] ti;
 		MapLocation target = rc.getInitialArchonLocations(enemy)[0];
 		myLocation = rc.getLocation();
-		dir = myLocation.directionTo(target).rotateLeftDegrees(30);
+		dir = myLocation.directionTo(target).rotateLeftDegrees(-30);
 		while (true) {
 
 			// Try/catch blocks stop unhandled exceptions, which cause your
@@ -211,7 +208,6 @@ public strictfp class RobotPlayer {
 					rc.broadcast(2, rc.getRoundNum());
 					rc.broadcast(3, (int) enemyLocation.x);
 					rc.broadcast(4, (int) enemyLocation.y);
-
 				}
 
 				ti = rc.senseNearbyTrees(2, rc.getTeam());
@@ -221,26 +217,30 @@ public strictfp class RobotPlayer {
 						rc.water(t.ID);
 				}
 
-				if (tree < 5) {
+				if (ti.length < 5) {
 
-					if (rc.canPlantTree(dir)) {
-						rc.plantTree(dir);
-						dir = dir.rotateLeftDegrees(60);
-						tree++;
-					} else if (FastMath.rand256() < 20) {
-						if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(30))) {
-							rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(30));
-						} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(60))) {
-							rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(60));
-						} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(90))) {
-							rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(90));
-						} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(120))) {
-							rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(120));
-						} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(150))) {
-							rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(150));
-						} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(180))) {
-							rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(180));
-						}
+					if (rc.canPlantTree(dir.rotateLeftDegrees(60))) {
+						rc.plantTree(dir.rotateLeftDegrees(60));
+					} else if (rc.canPlantTree(dir.rotateLeftDegrees(120))) {
+						rc.plantTree(dir.rotateLeftDegrees(120));
+					} else if (rc.canPlantTree(dir.rotateLeftDegrees(180))) {
+						rc.plantTree(dir.rotateLeftDegrees(180));
+					} else if (rc.canPlantTree(dir.rotateLeftDegrees(240))) {
+						rc.plantTree(dir.rotateLeftDegrees(240));
+					} else if (rc.canPlantTree(dir.rotateLeftDegrees(300))) {
+						rc.plantTree(dir.rotateLeftDegrees(300));
+					} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(30))) {
+						rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(30));
+					} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(60))) {
+						rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(60));
+					} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(90))) {
+						rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(90));
+					} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(120))) {
+						rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(120));
+					} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(150))) {
+						rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(150));
+					} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(180))) {
+						rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(180));
 					}
 
 				} else {
@@ -514,6 +514,53 @@ public strictfp class RobotPlayer {
 
 		// The code you want your robot to perform every round should be in this
 		// loop
+		TreeInfo[] trees = rc.senseNearbyTrees(-1, Team.NEUTRAL);
+		int done = 0;
+		while (true) {
+
+			// Try/catch blocks stop unhandled exceptions, which cause your
+			// robot to explode
+			try {
+				if (trees.length > 0) {
+					int closest_index = 0;
+					float mindist = 10000000;
+					myLocation = rc.getLocation();
+					for (int x = 0; x < trees.length; x++) {
+						TreeInfo this_tree = trees[x];
+						if (rc.canSenseLocation(this_tree.location)) {
+							if (rc.senseTreeAtLocation(this_tree.location) == null
+									|| !rc.senseTreeAtLocation(this_tree.location).team.equals(Team.NEUTRAL)) {
+								done++;
+							} else {
+								float distance_to = myLocation.distanceTo(this_tree.location);
+								if (mindist > distance_to) {
+									closest_index = x;
+									mindist = distance_to;
+								}
+								if (rc.canChop(this_tree.ID)) {
+									rc.chop(this_tree.ID);
+									move = false;
+								}
+							}
+						}
+					}
+					boolean far = mindist > (RobotType.LUMBERJACK.bodyRadius + trees[closest_index].radius);
+					if (!rc.hasMoved() && move && far && !trees[closest_index].getTeam().equals(rc.getTeam())) {
+						tryMove(myLocation.directionTo(trees[closest_index].location));
+					} else if (!far) {
+						move = false;
+					}
+					if (done >= trees.length)
+						break;
+				}
+				Clock.yield();
+
+			} catch (Exception e) {
+				System.out.println("Lumberjack Exception");
+				e.printStackTrace();
+			}
+		}
+
 		while (true) {
 
 			// Try/catch blocks stop unhandled exceptions, which cause your
@@ -551,7 +598,7 @@ public strictfp class RobotPlayer {
 						if (!rc.hasMoved())
 							tryMove(toEnemy);
 					} else {
-						TreeInfo[] trees = rc.senseNearbyTrees(-1);
+						trees = rc.senseNearbyTrees(-1);
 
 						if (trees.length > 0) {
 							int closest_index = 0;
