@@ -153,29 +153,75 @@ public strictfp class RobotPlayer {
 				myLocation = rc.getLocation();
 				if (tries < 100) {
 					boolean dist = myLocation.distanceTo(target) < 35;
-					if (dist && rc.senseNearbyRobots(5f).length <= 1 && rc.canPlantTree(dir)
+					if (dist && rc.senseNearbyRobots(3f).length <= 1 && rc.canPlantTree(dir)
 							&& rc.canPlantTree(dir.rotateLeftRads(60)) && rc.canPlantTree(dir.rotateLeftRads(120))
 							&& rc.canPlantTree(dir.rotateLeftRads(180)) && rc.canPlantTree(dir.rotateLeftRads(240))
 							&& rc.canPlantTree(dir.rotateLeftRads(300)))
 						break;
 					else if (rc.getTeamBullets() > 50 && dist) {
-						if (!tryMove(randomDirection(), 0, 0))
+						if (!tryMove(randomDirection(), 0, 0)) {
+							dir = dir.opposite();
+							if (rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0
+									&& rc.senseNearbyRobots(3f).length <= 1) {
+
+								if (rc.canBuildRobot(RobotType.LUMBERJACK, dir)) {
+									rc.buildRobot(RobotType.LUMBERJACK, dir);
+									break;
+								} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.opposite())) {
+									rc.buildRobot(RobotType.LUMBERJACK, dir.opposite());
+									break;
+
+								} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(90))) {
+									rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(90));
+									break;
+
+								} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateRightDegrees(90))) {
+									rc.buildRobot(RobotType.LUMBERJACK, dir.rotateRightDegrees(90));
+									break;
+
+								}
+
+							}
 							dir = randomDirection();
+
+						}
 					} else if (rc.getTeamBullets() > 50 || !dist) {
 						tryMove(myLocation.directionTo(target).rotateLeftDegrees(offset));
 					}
 					tries++;
 				} else {
-					if (rc.senseNearbyRobots(5f).length <= 1 && rc.canPlantTree(dir)
+					if (rc.senseNearbyRobots(3f).length <= 1 && rc.canPlantTree(dir)
 							&& rc.canPlantTree(dir.rotateLeftRads(60)) && rc.canPlantTree(dir.rotateLeftRads(120))
 							&& rc.canPlantTree(dir.rotateLeftRads(180)) && rc.canPlantTree(dir.rotateLeftRads(240))
 							&& rc.canPlantTree(dir.rotateLeftRads(300)))
 						break;
 
 					if (rc.getTeamBullets() > 50 && !rc.hasMoved())
-						if (!tryMove(dir, 0, 0))
-							dir = randomDirection();
+						if (!tryMove(dir, 0, 0)) {
+							if (rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0
+									&& rc.senseNearbyRobots(4f).length <= 1) {
+								dir = dir.opposite();
+								if (rc.canBuildRobot(RobotType.LUMBERJACK, dir)) {
+									rc.buildRobot(RobotType.LUMBERJACK, dir);
+									break;
+								} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.opposite())) {
+									rc.buildRobot(RobotType.LUMBERJACK, dir.opposite());
+									break;
 
+								} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(90))) {
+									rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(90));
+									break;
+
+								} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateRightDegrees(90))) {
+									rc.buildRobot(RobotType.LUMBERJACK, dir.rotateRightDegrees(90));
+									break;
+
+								}
+								dir = randomDirection();
+
+							}
+
+						}
 				}
 				// Clock.yield() makes the robot wait until the next turn,
 				// then
@@ -217,18 +263,37 @@ public strictfp class RobotPlayer {
 					if (t.health < min) {
 						min = t.health;
 					}
-					if (t.health < 40 && rc.canWater(t.ID))
+					if (t.health < 45 && rc.canWater(t.ID))
 						rc.water(t.ID);
 				}
 
-				if (tree < 5 && rc.canPlantTree(dir)) {
-					rc.plantTree(dir);
-					dir = dir.rotateLeftDegrees(60);
-					tree++;
+				if (tree < 5) {
 
+					if (rc.canPlantTree(dir)) {
+						rc.plantTree(dir);
+						dir = dir.rotateLeftDegrees(60);
+						tree++;
+					} else if (FastMath.rand256() < 50) {
+						if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(30))) {
+							rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(30));
+							if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(60))) {
+								rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(60));
+							} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(90))) {
+								rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(90));
+							} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(120))) {
+								rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(120));
+							} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(150))) {
+								rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(150));
+							} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(180))) {
+								rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(180));
+							}
+						}
+					}
 				} else {
-					if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && rc.isBuildReady()) {
+					if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && FastMath.rand256() < 100) {
 						rc.buildRobot(RobotType.LUMBERJACK, dir);
+					} else if (rc.canBuildRobot(RobotType.SOLDIER, dir) && FastMath.rand256() < 2) {
+						rc.buildRobot(RobotType.SOLDIER, dir);
 					}
 				}
 
@@ -239,6 +304,7 @@ public strictfp class RobotPlayer {
 				e.printStackTrace();
 			}
 		}
+
 	}
 
 	static void runGardener() throws GameActionException {
@@ -254,7 +320,7 @@ public strictfp class RobotPlayer {
 				// Try/catch blocks stop unhandled exceptions, which cause your
 				// robot to explode
 				try {
-					if (rc.senseNearbyRobots(5f).length <= 1 && rc.canPlantTree(dir)
+					if (rc.senseNearbyRobots(4f).length <= 1 && rc.canPlantTree(dir)
 							&& rc.canPlantTree(dir.rotateLeftRads(60)) && rc.canPlantTree(dir.rotateLeftRads(120))
 							&& rc.canPlantTree(dir.rotateLeftRads(180)) && rc.canPlantTree(dir.rotateLeftRads(240))
 							&& rc.canPlantTree(dir.rotateLeftRads(300)))
@@ -262,7 +328,28 @@ public strictfp class RobotPlayer {
 
 					if (rc.getTeamBullets() > 50 && !rc.hasMoved())
 						if (!tryMove(dir, 0, 0)) {
-							dir = randomDirection();
+							dir = dir.opposite();
+							if (rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0
+									&& rc.senseNearbyRobots(4f).length <= 1) {
+								if (rc.canBuildRobot(RobotType.LUMBERJACK, dir)) {
+									rc.buildRobot(RobotType.LUMBERJACK, dir);
+									break;
+								} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.opposite())) {
+									rc.buildRobot(RobotType.LUMBERJACK, dir.opposite());
+									break;
+
+								} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(90))) {
+									rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(90));
+									break;
+
+								} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateRightDegrees(90))) {
+									rc.buildRobot(RobotType.LUMBERJACK, dir.rotateRightDegrees(90));
+									break;
+								}
+								dir = randomDirection();
+
+							}
+
 						}
 
 					// Clock.yield() makes the robot wait until the next turn,
@@ -306,25 +393,37 @@ public strictfp class RobotPlayer {
 
 					ti = rc.senseNearbyTrees(2, rc.getTeam());
 
-					float min = 50f;
 					for (TreeInfo t : ti) {
-						if (t.health < min) {
-							min = t.health;
-						}
-						if (t.health < 40 && rc.canWater(t.ID))
+						if (t.health < 45 && rc.canWater(t.ID))
 							rc.water(t.ID);
 					}
 
-					if (tree < 5 && rc.canPlantTree(dir)) {
-						rc.plantTree(dir);
-						dir = dir.rotateLeftDegrees(60);
-						tree++;
+					if (tree < 5) {
+
+						if (rc.canPlantTree(dir)) {
+							rc.plantTree(dir);
+							dir = dir.rotateLeftDegrees(60);
+							tree++;
+						} else if (FastMath.rand256() < 50) {
+							if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(30))) {
+								rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(30));
+							} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(60))) {
+								rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(60));
+							} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(90))) {
+								rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(90));
+							} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(120))) {
+								rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(120));
+							} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(150))) {
+								rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(150));
+							} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(180))) {
+								rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(180));
+							}
+						}
 
 					} else {
-						if (rc.canBuildRobot(RobotType.SOLDIER, dir) && FastMath.rand256() < 30) {
+						if (rc.canBuildRobot(RobotType.SOLDIER, dir) && FastMath.rand256() < 100) {
 							rc.buildRobot(RobotType.SOLDIER, dir);
-						} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && FastMath.rand256() < 2
-								&& rc.isBuildReady()) {
+						} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && FastMath.rand256() < 2) {
 							rc.buildRobot(RobotType.LUMBERJACK, dir);
 						} else if (rc.canBuildRobot(RobotType.SCOUT, dir) && FastMath.rand256() < 1
 								&& rc.isBuildReady()) {
@@ -371,6 +470,8 @@ public strictfp class RobotPlayer {
 				if (robots.length > 0) {
 					// And we have enough bullets, and haven't attacked yet this
 					// turn...
+					myLocation = rc.getLocation();
+
 					MapLocation enemyLocation = robots[0].getLocation();
 					Direction toEnemy = myLocation.directionTo(enemyLocation);
 
@@ -380,6 +481,9 @@ public strictfp class RobotPlayer {
 					if (!rc.hasMoved()) {
 						tryMove(toEnemy.opposite());
 					}
+
+					myLocation = rc.getLocation();
+					toEnemy = myLocation.directionTo(enemyLocation);
 
 					if (robots.length > 4 && rc.canFirePentadShot()) {
 						rc.firePentadShot(toEnemy);
@@ -405,6 +509,23 @@ public strictfp class RobotPlayer {
 					}
 					if (!rc.hasMoved())
 						tryMove(d);
+					if (!rc.hasAttacked()) {
+						myLocation = rc.getLocation();
+
+						TreeInfo[] trees = rc.senseNearbyTrees(3);
+
+						if (trees.length > 0) {
+							for (int x = 0; x < trees.length; x++) {
+								TreeInfo this_tree = trees[x];
+								if (!this_tree.getTeam().equals(rc.getTeam()) && !rc.hasAttacked()
+										&& rc.canFireSingleShot()) {
+									rc.fireSingleShot(myLocation.directionTo(this_tree.location));
+									break;
+
+								}
+							}
+						}
+					}
 				}
 				// Clock.yield() makes the robot wait until the next turn, then
 				// it will perform this loop again
@@ -415,6 +536,7 @@ public strictfp class RobotPlayer {
 				e.printStackTrace();
 			}
 		}
+
 	}
 
 	static void runTank() throws GameActionException {
@@ -445,8 +567,6 @@ public strictfp class RobotPlayer {
 					MapLocation enemyLocation = robots[0].getLocation();
 					Direction toEnemy = myLocation.directionTo(enemyLocation);
 
-					if (rc.canFireSingleShot())
-						rc.fireSingleShot(toEnemy);
 					rc.broadcast(2, rc.getRoundNum());
 					rc.broadcast(3, (int) enemyLocation.x);
 					rc.broadcast(4, (int) enemyLocation.y);
@@ -457,27 +577,41 @@ public strictfp class RobotPlayer {
 						else
 							tryMove(toEnemy.opposite());
 					}
+
+					if (robots.length > 4 && rc.canFirePentadShot()) {
+						rc.firePentadShot(toEnemy);
+					} else if (robots.length > 2 && rc.canFireTriadShot()) {
+						rc.fireTriadShot(toEnemy);
+					} else if (rc.canFireSingleShot())
+						rc.fireSingleShot(toEnemy);
 				} else {
 
 					Direction d = randomDirection();
-					try {
-						if (rc.readBroadcast(2) != 0) {
-							int x = rc.readBroadcast(3);
-							int y = rc.readBroadcast(4);
-							if (myLocation.isWithinDistance(new MapLocation(x, y), 5)) {
-								rc.broadcast(2, 0);
-							}
-							d = new Direction(x - myLocation.x, y - myLocation.y);
-							tryMove(d);
-							if (rc.canFireSingleShot()) {
-								rc.fireSingleShot(d);
-							}
+					if (rc.readBroadcast(2) != 0) {
+						int x = rc.readBroadcast(3);
+						int y = rc.readBroadcast(4);
+						if (myLocation.isWithinDistance(new MapLocation(x, y), 5)) {
+							rc.broadcast(2, 0);
 						}
-					} catch (GameActionException e) {
-
+						d = new Direction(x - myLocation.x, y - myLocation.y);
 					}
+
 					if (!rc.hasMoved())
 						tryMove(d);
+
+					TreeInfo[] trees = rc.senseNearbyTrees(3);
+
+					if (trees.length > 0) {
+						for (int x = 0; x < trees.length; x++) {
+							TreeInfo this_tree = trees[x];
+							if (!this_tree.getTeam().equals(rc.getTeam()) && !rc.hasAttacked()
+									&& rc.canFireSingleShot()) {
+								rc.fireSingleShot(myLocation.directionTo(this_tree.location));
+								break;
+
+							}
+						}
+					}
 				}
 				// Clock.yield() makes the robot wait until the next turn, then
 				// it will perform this loop again
@@ -527,6 +661,9 @@ public strictfp class RobotPlayer {
 							tryMove(toEnemy);
 						else
 							tryMove(toEnemy.opposite());
+					}
+					if (rc.canFireSingleShot()) {
+						rc.fireSingleShot(toEnemy);
 					}
 				} else {
 
