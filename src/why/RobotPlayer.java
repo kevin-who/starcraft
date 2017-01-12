@@ -109,8 +109,7 @@ public strictfp class RobotPlayer {
 					tryMove(dir);
 
 				dir = myLocation.directionTo(enemyLocation);
-				if (rc.canHireGardener(dir) && (rc.getRoundNum() < 200
-						|| (rc.getRoundNum() > 250 && FastMath.rand256() < 12) || FastMath.rand256() < 4)) {
+				if (rc.canHireGardener(dir) && (FastMath.rand256() < 3 || rc.getRoundNum() < 200)) {
 					rc.hireGardener(dir);
 				}
 
@@ -146,6 +145,8 @@ public strictfp class RobotPlayer {
 		int offset = FastMath.rand256() % 1 == 0 ? 35 : -35;
 		Direction dir = myLocation.directionTo(target).rotateLeftDegrees(offset);
 
+		int cd = 0;
+
 		while (true) {
 			// Try/catch blocks stop unhandled exceptions, which cause your
 			// robot to explode
@@ -161,28 +162,29 @@ public strictfp class RobotPlayer {
 					else if (rc.getTeamBullets() > 50 && dist) {
 						if (!tryMove(randomDirection(), 0, 0)) {
 							dir = dir.opposite();
-							if (rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0
+							if (cd <= 0 && rc.senseNearbyTrees(-1, Team.NEUTRAL).length > 0
 									&& rc.senseNearbyRobots(3f).length <= 1) {
 
 								if (rc.canBuildRobot(RobotType.LUMBERJACK, dir)) {
 									rc.buildRobot(RobotType.LUMBERJACK, dir);
-									break;
+									cd = 100;
 								} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.opposite())) {
 									rc.buildRobot(RobotType.LUMBERJACK, dir.opposite());
-									break;
+									cd = 100;
 
 								} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(90))) {
 									rc.buildRobot(RobotType.LUMBERJACK, dir.rotateLeftDegrees(90));
-									break;
+									cd = 100;
 
 								} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir.rotateRightDegrees(90))) {
 									rc.buildRobot(RobotType.LUMBERJACK, dir.rotateRightDegrees(90));
-									break;
+									cd = 100;
 
 								}
 
 							}
 							dir = randomDirection();
+							cd--;
 
 						}
 					} else if (rc.getTeamBullets() > 50 || !dist) {
@@ -290,7 +292,7 @@ public strictfp class RobotPlayer {
 						}
 					}
 				} else {
-					if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && FastMath.rand256() < 100) {
+					if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && FastMath.rand256() < 50) {
 						rc.buildRobot(RobotType.LUMBERJACK, dir);
 					} else if (rc.canBuildRobot(RobotType.SOLDIER, dir) && FastMath.rand256() < 2) {
 						rc.buildRobot(RobotType.SOLDIER, dir);
@@ -421,7 +423,7 @@ public strictfp class RobotPlayer {
 						}
 
 					} else {
-						if (rc.canBuildRobot(RobotType.SOLDIER, dir) && FastMath.rand256() < 100) {
+						if (rc.canBuildRobot(RobotType.SOLDIER, dir) && FastMath.rand256() < 50) {
 							rc.buildRobot(RobotType.SOLDIER, dir);
 						} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && FastMath.rand256() < 2) {
 							rc.buildRobot(RobotType.LUMBERJACK, dir);
@@ -738,7 +740,7 @@ public strictfp class RobotPlayer {
 								TreeInfo this_tree = trees[x];
 								if (!this_tree.getTeam().equals(rc.getTeam())) {
 									float distance_to = myLocation.distanceSquaredTo(this_tree.location);
-									if (mindist < distance_to) {
+									if (mindist > distance_to) {
 										closest_index = x;
 										mindist = distance_to;
 									}
