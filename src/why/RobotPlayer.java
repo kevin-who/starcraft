@@ -109,7 +109,7 @@ public strictfp class RobotPlayer {
 					tryMove(dir);
 
 				dir = myLocation.directionTo(enemyLocation);
-				if (rc.canHireGardener(dir) && (rc.getRoundNum() < 200 || FastMath.rand256() < 10)) {
+				if (rc.canHireGardener(dir) && (rc.getRoundNum() < 200 || FastMath.rand256() < 12)) {
 					rc.hireGardener(dir);
 				}
 
@@ -244,11 +244,13 @@ public strictfp class RobotPlayer {
 					}
 
 				} else {
-					if (rc.canBuildRobot(RobotType.SOLDIER, dir) && FastMath.rand256() < 50) {
-						rc.buildRobot(RobotType.SOLDIER, dir);
-					} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && FastMath.rand256() < 2) {
+					// if (rc.canBuildRobot(RobotType.SOLDIER, dir) &&
+					// FastMath.rand256() < 100) {
+					// rc.buildRobot(RobotType.SOLDIER, dir);
+					// } else
+					if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && FastMath.rand256() < 200) {
 						rc.buildRobot(RobotType.LUMBERJACK, dir);
-					} else if (rc.canBuildRobot(RobotType.SCOUT, dir) && FastMath.rand256() < 1 && rc.isBuildReady()) {
+					} else if (rc.canBuildRobot(RobotType.SCOUT, dir) && FastMath.rand256() < 6 && rc.isBuildReady()) {
 						rc.buildRobot(RobotType.SCOUT, dir);
 					}
 				}
@@ -300,7 +302,7 @@ public strictfp class RobotPlayer {
 					rc.broadcast(3, (int) enemyLocation.x);
 					rc.broadcast(4, (int) enemyLocation.y);
 					if (!rc.hasMoved()) {
-						tryMove(toEnemy.opposite());
+						tryMove(toEnemy);
 					}
 
 					myLocation = rc.getLocation();
@@ -552,6 +554,8 @@ public strictfp class RobotPlayer {
 					}
 					if (done >= trees.length)
 						break;
+				} else {
+					break;
 				}
 				Clock.yield();
 
