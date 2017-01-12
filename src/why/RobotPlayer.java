@@ -1,6 +1,4 @@
-package bendan;
-
-import java.util.Random;
+package why;
 
 import battlecode.common.BulletInfo;
 import battlecode.common.Clock;
@@ -17,8 +15,6 @@ import battlecode.common.TreeInfo;
 public strictfp class RobotPlayer {
 	static RobotController rc;
 
-	static Random rnd;
-
 	static MapLocation myLocation;
 
 	/**
@@ -27,15 +23,8 @@ public strictfp class RobotPlayer {
 	 **/
 	public static void run(RobotController rc) throws GameActionException {
 
-		// This is the RobotController object. You use it to perform actions
-		// from this robot,
-		// and to get information on its current status.
 		RobotPlayer.rc = rc;
-		rnd = new Random(rc.getID());
-		// Here, we've separated the controls into a different method for each
-		// RobotType.
-		// You can add the missing ones or rewrite this into your own control
-		// structure.
+		FastMath.initRand(rc);
 
 		switch (rc.getType()) {
 		case ARCHON:
@@ -107,7 +96,7 @@ public strictfp class RobotPlayer {
 					rc.broadcast(4, (int) enemyLocation.y);
 
 				}
-				if(rc.getRoundNum()<10){
+				if (rc.getRoundNum() < 10) {
 					MapLocation enemyLocation = rc.getInitialArchonLocations(enemy)[0];
 					rc.broadcast(2, rc.getRoundNum());
 					rc.broadcast(3, (int) enemyLocation.x);
@@ -118,26 +107,21 @@ public strictfp class RobotPlayer {
 
 				if (!rc.hasMoved())
 					tryMove(dir);
-				
+
 				// Randomly attempt to build a gardener in this direction
-				if (rc.canHireGardener(dir) && (rc.getRoundNum() < 2 || (rc.getTreeCount() > 2 && rc.getRoundNum() < 150)
-						|| rnd.nextDouble() > .001)) {
-					if (rc.canHireGardener(dir))
-						rc.hireGardener(dir);
+				if (rc.canHireGardener(dir) && (FastMath.rand256() < 4 || rc.getRoundNum() < 200)) {
+					rc.hireGardener(dir);
 				}
-				
 
 				if (rc.getRoundLimit() - rc.getRoundNum() < 750) {
 					if (rc.getTeamBullets() > 60)
 						rc.donate(20);
 				}
-				
-				if(rc.getTeamBullets()>10000){
-					rc.donate(10000);
-				}
-				if (rc.getTeamBullets() > 600)
+				float ammo = rc.getTeamBullets();
+				if ((int) (ammo / 10) + rc.getTeamVictoryPoints() >= 1000) {
+					rc.donate(rc.getTeamBullets());
+				} else if (ammo > 600)
 					rc.donate(100);
-				
 
 				// Clock.yield() makes the robot wait until the next turn, then
 				// it will perform this loop again
@@ -154,9 +138,7 @@ public strictfp class RobotPlayer {
 		System.out.println("I'm a gardener!");
 		Team enemy = rc.getTeam().opponent();
 		int tree = 0;
-		
-		
-		
+
 		Direction dir = randomDirection();
 
 		while (true) {
@@ -193,6 +175,10 @@ public strictfp class RobotPlayer {
 			// Try/catch blocks stop unhandled exceptions, which cause your
 			// robot to explode
 			try {
+				if ((int) (rc.getTeamBullets() / 10) + rc.getTeamVictoryPoints() >= 1000) {
+
+					rc.donate(rc.getTeamBullets());
+				}
 				myLocation = rc.getLocation();
 
 				RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
@@ -222,22 +208,16 @@ public strictfp class RobotPlayer {
 					tree++;
 
 				} else {
-					 if (rc.canBuildRobot(RobotType.SOLDIER, dir) &&
-					 rnd.nextDouble() < .03) {
-					 rc.buildRobot(RobotType.SOLDIER, dir);
-					 } else
-					 if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) &&
-					 rnd.nextDouble() < .03 && rc.isBuildReady()) {
-					 rc.buildRobot(RobotType.LUMBERJACK, dir);
-					 }
-					 else
-						 if (rc.canBuildRobot(RobotType.SCOUT, dir) &&
-					 rnd.nextDouble() < .01 && rc.isBuildReady()) {
-					 rc.buildRobot(RobotType.SCOUT, dir);
-					 } else if (rc.canBuildRobot(RobotType.TANK, dir) &&
-					 rnd.nextDouble() < .02 && rc.isBuildReady()) {
-					 rc.buildRobot(RobotType.TANK, dir);
-					 }
+					if (rc.canBuildRobot(RobotType.SOLDIER, dir) && FastMath.rand256() < 12) {
+						rc.buildRobot(RobotType.SOLDIER, dir);
+					} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && FastMath.rand256() < 6
+							&& rc.isBuildReady()) {
+						rc.buildRobot(RobotType.LUMBERJACK, dir);
+					} else if (rc.canBuildRobot(RobotType.SCOUT, dir) && FastMath.rand256() < 3 && rc.isBuildReady()) {
+						rc.buildRobot(RobotType.SCOUT, dir);
+					} else if (rc.canBuildRobot(RobotType.TANK, dir) && FastMath.rand256() < 3 && rc.isBuildReady()) {
+						rc.buildRobot(RobotType.TANK, dir);
+					}
 				}
 
 				// Clock.yield() makes the robot wait until the next turn, then
@@ -263,6 +243,10 @@ public strictfp class RobotPlayer {
 			// robot to explode
 			try {
 
+				if ((int) (rc.getTeamBullets() / 10) + rc.getTeamVictoryPoints() >= 1000) {
+
+					rc.donate(rc.getTeamBullets());
+				}
 				myLocation = rc.getLocation();
 				dodge();
 
@@ -282,10 +266,13 @@ public strictfp class RobotPlayer {
 					if (!rc.hasMoved()) {
 						tryMove(toEnemy.opposite());
 					}
-					int d = (int) myLocation.distanceTo(enemyLocation);
-					if (rc.canFireSingleShot())
+
+					if (robots.length > 4 && rc.canFirePentadShot()) {
+						rc.firePentadShot(toEnemy);
+					} else if (robots.length > 2 && rc.canFireTriadShot()) {
+						rc.fireTriadShot(toEnemy);
+					} else if (rc.canFireSingleShot())
 						rc.fireSingleShot(toEnemy);
-					
 
 				} else {
 
@@ -327,6 +314,10 @@ public strictfp class RobotPlayer {
 			// Try/catch blocks stop unhandled exceptions, which cause your
 			// robot to explode
 			try {
+				if ((int) (rc.getTeamBullets() / 10) + rc.getTeamVictoryPoints() >= 1000) {
+
+					rc.donate(rc.getTeamBullets());
+				}
 				myLocation = rc.getLocation();
 				dodge();
 
@@ -397,6 +388,10 @@ public strictfp class RobotPlayer {
 			// Try/catch blocks stop unhandled exceptions, which cause your
 			// robot to explode
 			try {
+				if ((int) (rc.getTeamBullets() / 10) + rc.getTeamVictoryPoints() >= 1000) {
+
+					rc.donate(rc.getTeamBullets());
+				}
 				myLocation = rc.getLocation();
 				dodge();
 				// See if there are any nearby enemy robots
@@ -442,6 +437,7 @@ public strictfp class RobotPlayer {
 	static void runLumberjack() throws GameActionException {
 		System.out.println("I'm a lumberjack!");
 		Team enemy = rc.getTeam().opponent();
+		boolean move = true;
 
 		// The code you want your robot to perform every round should be in this
 		// loop
@@ -450,7 +446,10 @@ public strictfp class RobotPlayer {
 			// Try/catch blocks stop unhandled exceptions, which cause your
 			// robot to explode
 			try {
-
+				if ((int) (rc.getTeamBullets() / 10) + rc.getTeamVictoryPoints() >= 1000) {
+					rc.donate(rc.getTeamBullets());
+				}
+				move = true;
 				// See if there are any enemy robots within striking range
 				// (distance 1 from lumberjack's radius)
 
@@ -460,41 +459,17 @@ public strictfp class RobotPlayer {
 				RobotInfo[] robots = rc.senseNearbyRobots(
 						RobotType.LUMBERJACK.bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS, enemy);
 
-				TreeInfo[] trees = rc.senseNearbyTrees();
-
-				if (trees.length > 0) {
-					int closest_index=0;
-					float mindist=10000000;
-					for (int x = 0; x < trees.length; x++) {
-						TreeInfo this_tree = trees[x];
-						if (this_tree.getTeam() != rc.getTeam()) {
-							float distance_to = myLocation.distanceSquaredTo(this_tree.location);
-							if (mindist<distance_to) {
-								closest_index = x;
-								mindist = distance_to;
-							}
-							if (rc.canChop(this_tree.ID)) {
-								rc.chop(this_tree.ID);
-							}
-						}
-					}
-					if(!rc.hasMoved()) {
-						tryMove(myLocation.directionTo(trees[closest_index].location));
-					}
+				if (robots.length > 0 && !rc.hasAttacked()) {
+					// Use strike() to hit all nearby robots!
+					rc.strike();
+					rc.broadcast(2, rc.getRoundNum());
+					rc.broadcast(3, (int) myLocation.x);
+					rc.broadcast(4, (int) myLocation.y);
 				} else {
-					// No close robots, so search for robots within sight radius
 					robots = rc.senseNearbyRobots(-1, enemy);
 
-					// If there is a robot, move towards it
-
 					if (robots.length > 0) {
-						if (!rc.hasAttacked()){
-							// Use strike() to hit all nearby robots!
-							rc.strike();
-							rc.broadcast(2, rc.getRoundNum());
-							rc.broadcast(3, (int) myLocation.x);
-							rc.broadcast(4, (int) myLocation.y);
-						}
+
 						MapLocation enemyLocation = robots[0].getLocation();
 						Direction toEnemy = myLocation.directionTo(enemyLocation);
 						rc.broadcast(2, rc.getRoundNum());
@@ -503,8 +478,30 @@ public strictfp class RobotPlayer {
 						if (!rc.hasMoved())
 							tryMove(toEnemy);
 					} else {
+						TreeInfo[] trees = rc.senseNearbyTrees(-1);
 
-						if (!rc.hasMoved()) {
+						if (trees.length > 0) {
+							int closest_index = 0;
+							float mindist = 10000000;
+							for (int x = 0; x < trees.length; x++) {
+								TreeInfo this_tree = trees[x];
+								if (!this_tree.getTeam().equals(rc.getTeam())) {
+									float distance_to = myLocation.distanceSquaredTo(this_tree.location);
+									if (mindist < distance_to) {
+										closest_index = x;
+										mindist = distance_to;
+									}
+									if (rc.canChop(this_tree.ID)) {
+										rc.chop(this_tree.ID);
+									}
+								}
+							}
+							if (!rc.hasMoved() && mindist > 1 && !trees[closest_index].getTeam().equals(rc.getTeam())) {
+								tryMove(myLocation.directionTo(trees[closest_index].location), 90, 4);
+								move = false;
+							}
+						}
+						if (!rc.hasMoved() && move) {
 
 							Direction d = randomDirection();
 							if (rc.readBroadcast(2) != 0) {
@@ -515,15 +512,12 @@ public strictfp class RobotPlayer {
 								}
 								d = new Direction(x - myLocation.x, y - myLocation.y);
 							}
-							tryMove(d, 180,10);
+							tryMove(d);
 
 						}
 					}
 
 				}
-
-				// Clock.yield() makes the robot wait until the next turn, then
-				// it will perform this loop again
 				Clock.yield();
 
 			} catch (Exception e) {
@@ -539,7 +533,7 @@ public strictfp class RobotPlayer {
 	 * @return a random Direction
 	 */
 	static Direction randomDirection() {
-		return new Direction((float) (rnd.nextDouble() * 2.0f * Math.PI));
+		return new Direction((float) (FastMath.rand256() * 2.0f * 0.0122718463));
 	}
 
 	/**
@@ -578,7 +572,6 @@ public strictfp class RobotPlayer {
 		}
 
 		// Now try a bunch of similar angles
-		boolean moved = false;
 		int currentCheck = 1;
 
 		while (currentCheck <= checksPerSide) {
@@ -635,10 +628,7 @@ public strictfp class RobotPlayer {
 		// This corresponds to the smallest radius circle centered at our
 		// location that would intersect with the
 		// line that is the path of the bullet.
-		float perpendicularDist = (float) Math.abs(distToRobot * Math.sin(theta)); // soh
-																					// cah
-																					// toa
-																					// :)
+		float perpendicularDist = (float) Math.abs(distToRobot * Math.sin(theta));
 
 		return (perpendicularDist <= rc.getType().bodyRadius);
 	}
