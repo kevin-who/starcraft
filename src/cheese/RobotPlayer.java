@@ -486,7 +486,7 @@ public strictfp class RobotPlayer {
 		// The code you want your robot to perform every round should be in this
 		// loop
 		while (true) {
-
+			myLocation = rc.getLocation();
 			if (rc.readBroadcast(10) != -1) {
 				int x = rc.readBroadcast(11);
 				int y = rc.readBroadcast(12);
