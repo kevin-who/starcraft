@@ -171,19 +171,19 @@ public strictfp class RobotPlayer {
             // robot to explode
             try {
 //
-                float archon_dist = 0;
-
-                RobotInfo[] near_bots = rc.senseNearbyRobots(-1,rc.getTeam());
+//                float archon_dist = 0;
 //
-                for (int x = 0; x < near_bots.length; x++) {
-                    RobotInfo this_bot = near_bots[x];
-                    if(this_bot.getType()==RobotType.ARCHON){
-                        float distance = myLocation.distanceSquaredTo(this_bot.location);
-                        if(distance<archon_dist){
-                            archon_dist = distance;
-                        }
-                    }
-                }
+//                RobotInfo[] near_bots = rc.senseNearbyRobots(-1,rc.getTeam());
+////
+//                for (int x = 0; x < near_bots.length; x++) {
+//                    RobotInfo this_bot = near_bots[x];
+//                    if(this_bot.getType()==RobotType.ARCHON){
+//                        float distance = myLocation.distanceSquaredTo(this_bot.location);
+//                        if(distance<archon_dist){
+//                            archon_dist = distance;
+//                        }
+//                    }
+//                }
 
                 myLocation = rc.getLocation();
 
