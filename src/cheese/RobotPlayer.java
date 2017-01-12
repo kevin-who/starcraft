@@ -78,6 +78,7 @@ public strictfp class RobotPlayer {
 	static void runArchon() throws GameActionException {
 		System.out.println("ARCHON");
 		Team enemy = rc.getTeam().opponent();
+		Direction dir= randomDirection();
 
 		// The code you want your robot to perform every round should be in this
 		// loop
@@ -86,36 +87,43 @@ public strictfp class RobotPlayer {
 			// Try/catch blocks stop unhandled exceptions, which cause your
 			// robot to explode
 			try {
+				int round = rc.getRoundNum();
 				myLocation = rc.getLocation();
 				dodge();
 
+				int nearby_gardeners = 0;
+
 				RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
+				RobotInfo[] bots = rc.senseNearbyRobots(-1, enemy);
+				for (int x = 0; x < bots.length; x++) {
+					if(bots[x].getType()==RobotType.GARDENER){
+						nearby_gardeners++;
+					}
+				}
 
 				if (robots.length > 0) {
 					MapLocation enemyLocation = robots[0].getLocation();
-					rc.broadcast(2, rc.getRoundNum());
-					rc.broadcast(3, (int) enemyLocation.x);
-					rc.broadcast(4, (int) enemyLocation.y);
-
+					rc.broadcast(10, rc.getRoundNum());
+					rc.broadcast(11, (int) enemyLocation.x);
+					rc.broadcast(12, (int) enemyLocation.y);
+				}else{
+					rc.broadcast(10, -1);
 				}
 
 				// Generate a random direction
-				Direction dir = randomDirection();
-
 				// Randomly attempt to build a gardener in this direction
-				if (rc.canHireGardener(dir)) {
+				if (rc.canHireGardener(dir)&&nearby_gardeners<5&&rand256()<200) {
 					rc.hireGardener(dir);
 				}
 
 				if (!rc.hasMoved())
-					tryMove(randomDirection());
+					if(round%4==0){
+						dir = randomDirection();
+					}
+					tryMove(dir);
 
-				if (rc.getRoundLimit() - rc.getRoundNum() < 750) {
-					if (rc.getTeamBullets() > 60)
-						rc.donate(20);
-				}
-				if (rc.getTeamBullets() > 600)
-					rc.donate(100);
+				if (rc.getTeamBullets() > 300)
+					rc.donate(50);
 
 				// Clock.yield() makes the robot wait until the next turn, then
 				// it will perform this loop again
@@ -129,7 +137,7 @@ public strictfp class RobotPlayer {
 	}
 
 	static void runGardener() throws GameActionException {
-		System.out.println("I'm a gardener!");
+		System.out.println("GARDENER");
 		Team enemy = rc.getTeam().opponent();
 		boolean tree_hub = false;
 		Direction dir = randomDirection();
@@ -226,7 +234,7 @@ public strictfp class RobotPlayer {
 					rc.buildRobot(RobotType.LUMBERJACK, dir);
 				}
 
-				if (close_trees == 0 && far_trees == 0 && rand256() < 168&& rc.canPlantTree(dir)) {
+				if (close_trees == 0 && far_trees == 0 && rc.canPlantTree(dir)) {
 					tree_hub = true;
 				}
 
@@ -478,6 +486,12 @@ public strictfp class RobotPlayer {
 		// The code you want your robot to perform every round should be in this
 		// loop
 		while (true) {
+
+			if (rc.readBroadcast(10) != -1) {
+				int x = rc.readBroadcast(11);
+				int y = rc.readBroadcast(12);
+				tryMove(new Direction(x - myLocation.x, y - myLocation.y));
+			}
 
 			// Try/catch blocks stop unhandled exceptions, which cause your
 			// robot to explode
