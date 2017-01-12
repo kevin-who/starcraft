@@ -103,13 +103,13 @@ public strictfp class RobotPlayer {
 					rc.broadcast(4, (int) enemyLocation.y);
 				}
 				// Generate a random direction
-				Direction dir = myLocation.directionTo(enemyLocation).opposite();
+				Direction dir = randomDirection();
 
 				if (!rc.hasMoved())
-					tryMove(dir, 0, 0);
+					tryMove(dir);
 
-				dir = dir.opposite().rotateLeftDegrees(90 * (FastMath.rand256() / 256f - 128));
-				if (rc.canHireGardener(dir) && (rc.getRoundNum() < 200 || FastMath.rand256() < 10)) {
+				dir = myLocation.directionTo(enemyLocation);
+				if (rc.canHireGardener(dir) && (rc.getRoundNum() < 200 ||FastMath.rand256() < 10 )) {
 					rc.hireGardener(dir);
 				}
 
@@ -487,14 +487,14 @@ public strictfp class RobotPlayer {
 					myLocation = rc.getLocation();
 					toEnemy = myLocation.directionTo(enemyLocation);
 
-					int d = (int) myLocation.distanceTo(enemyLocation);
-					if (d < 3 && rc.canFirePentadShot())
-						rc.firePentadShot(toEnemy);
-					else if (d < 5 && rc.canFireTriadShot()) {
-						rc.fireTriadShot(toEnemy);
-					} else if (rc.canFireSingleShot()) {
-						rc.fireSingleShot(toEnemy);
-					}
+                    int d = (int) myLocation.distanceTo(enemyLocation);
+                    if (d < 3 && rc.canFirePentadShot())
+                        rc.firePentadShot(toEnemy);
+                    else if (d < 5 && rc.canFireTriadShot()) {
+                        rc.fireTriadShot(toEnemy);
+                    } else if (rc.canFireSingleShot()) {
+                        rc.fireSingleShot(toEnemy);
+                    }
 				} else {
 
 					Direction d = randomDirection();
