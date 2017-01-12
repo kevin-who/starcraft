@@ -102,12 +102,21 @@ public strictfp class RobotPlayer {
                 Direction dir = randomDirection();
 
                 // Randomly attempt to build a gardener in this direction
+<<<<<<< Updated upstream
                 if (rc.canHireGardener(dir) && (rand256() < 3 || rc.getRoundNum() < 200)) {
                         rc.hireGardener(dir);
                 }
                 
                 if (!rc.hasMoved())
                     tryMove(randomDirection());
+=======
+                if (rc.canHireGardener(dir)) {
+                    if (rc.canHireGardener(dir))
+                        rc.hireGardener(dir);
+                }
+//                if (!rc.hasMoved())
+//                    tryMove(randomDirection());
+>>>>>>> Stashed changes
 
                 if (rc.getRoundLimit() - rc.getRoundNum() < 750) {
                     if (rc.getTeamBullets() > 60)
@@ -126,10 +135,41 @@ public strictfp class RobotPlayer {
             }
         }
     }
-
     static void runGardener() throws GameActionException {
-        System.out.println("GARDENER");
+        System.out.println("I'm a gardener!");
         Team enemy = rc.getTeam().opponent();
+        int tree = 0;
+        boolean tree_hub = false;
+
+
+
+        Direction dir = randomDirection();
+
+        while (true) {
+
+            // Try/catch blocks stop unhandled exceptions, which cause your
+            // robot to explode
+            try {
+                if (rc.senseNearbyRobots(5f).length <= 1 && rc.canPlantTree(dir)
+                        && rc.canPlantTree(dir.rotateLeftRads(60)) && rc.canPlantTree(dir.rotateLeftRads(120))
+                        && rc.canPlantTree(dir.rotateLeftRads(180)) && rc.canPlantTree(dir.rotateLeftRads(240))
+                        && rc.canPlantTree(dir.rotateLeftRads(300)))
+                    break;
+
+                if (rc.getTeamBullets() > 50 && !rc.hasMoved())
+                    if (!tryMove(dir, 0, 0)) {
+                        dir = randomDirection();
+                    }
+
+                // Clock.yield() makes the robot wait until the next turn, then
+                // it will perform this loop again
+                Clock.yield();
+
+            } catch (Exception e) {
+                System.out.println("Gardener Exception");
+                e.printStackTrace();
+            }
+        }
 
         // The code you want your robot to perform every round should be in this
         // loop
@@ -139,9 +179,22 @@ public strictfp class RobotPlayer {
             // Try/catch blocks stop unhandled exceptions, which cause your
             // robot to explode
             try {
-                myLocation = rc.getLocation();
+//
+                float archon_dist = 0;
 
-                dodge();
+                RobotInfo[] near_bots = rc.senseNearbyRobots(-1,rc.getTeam());
+//
+                for (int x = 0; x < near_bots.length; x++) {
+                    RobotInfo this_bot = near_bots[x];
+                    if(this_bot.getType()==RobotType.ARCHON){
+                        float distance = myLocation.distanceSquaredTo(this_bot.location);
+                        if(distance<archon_dist){
+                            archon_dist = distance;
+                        }
+                    }
+                }
+
+                myLocation = rc.getLocation();
 
                 RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
 
@@ -153,41 +206,65 @@ public strictfp class RobotPlayer {
 
                 }
 
-                Direction dir = randomDirection();
                 ti = rc.senseNearbyTrees(-1, rc.getTeam());
 
-                if (ti.length < 5 && rc.canPlantTree(dir) && (rc.getRoundNum() < 125 || rand256() < 3)) {
-                    rc.plantTree(dir);
-                } else if (rc.canBuildRobot(RobotType.SOLDIER, dir) && rand256() < 6) {
-                    rc.buildRobot(RobotType.SOLDIER, dir);
-                } else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && rand256() < 6 && rc.isBuildReady()) {
-                    rc.buildRobot(RobotType.LUMBERJACK, dir);
-                } else if (rc.canBuildRobot(RobotType.SCOUT, dir) && rand256() < 6 && rc.isBuildReady()) {
-                    rc.buildRobot(RobotType.SCOUT, dir);
-                } else if (rc.canBuildRobot(RobotType.TANK, dir) && rand256() < 6 && rc.isBuildReady()) {
-                    rc.buildRobot(RobotType.TANK, dir);
+                int close_trees= 0;
+                int far_trees = 0;
+
+                for (int x = 0; x < ti.length; x++) {
+                    TreeInfo this_tree = ti[x];
+                    float distance_to = myLocation.distanceSquaredTo(this_tree.location);
+                    if (distance_to<5) {
+                        close_trees++;
+                    }else if (distance_to<30){
+                        far_trees++;
+                    }
                 }
 
                 float min = 50f;
                 for (TreeInfo t : ti) {
                     if (t.health < min) {
-                        dir = new Direction(rc.getLocation(), t.getLocation());
                         min = t.health;
                     }
                     if (t.health < 40 && rc.canWater(t.ID))
                         rc.water(t.ID);
                 }
+                if (close_trees == 0 && far_trees == 0 && rand256()<128){
+                    tree_hub = true;
+                }
 
-                // Move randomly
-                if (!rc.hasMoved())
-                    tryMove(dir);
+                if (tree_hub == true && close_trees < 5 && rc.canPlantTree(dir)) {
+                    rc.plantTree(dir);
+                    dir = dir.rotateLeftDegrees(60);
+                    tree++;
+
+                } else {
+                    if (tree_hub == false){
+                        tryMove(randomDirection());
+                    }
+                    if (rc.canBuildRobot(RobotType.SOLDIER, dir) &&
+                            rand256() < 16) {
+                        rc.buildRobot(RobotType.SOLDIER, dir);
+                    } else
+                         if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) &&
+                         rand256() <2 && rc.isBuildReady()) {
+                         rc.buildRobot(RobotType.LUMBERJACK, dir);
+                         }
+                         else if (rc.canBuildRobot(RobotType.SCOUT, dir) &&
+                                rand256() < 0 && rc.isBuildReady()) {
+                            rc.buildRobot(RobotType.SCOUT, dir);
+                        } else if (rc.canBuildRobot(RobotType.TANK, dir) &&
+                                rand256() < 0 && rc.isBuildReady()) {
+                            rc.buildRobot(RobotType.TANK, dir);
+                        }
+                }
 
                 // Clock.yield() makes the robot wait until the next turn, then
                 // it will perform this loop again
                 Clock.yield();
 
             } catch (Exception e) {
-                System.out.println("GARDENER EXCEPTION");
+                System.out.println("Gardener Exception");
                 e.printStackTrace();
             }
         }
@@ -302,6 +379,9 @@ public strictfp class RobotPlayer {
                         if (rc.readBroadcast(2) >= rc.getRoundNum() - 1) {
                             int x = rc.readBroadcast(3);
                             int y = rc.readBroadcast(4);
+                            if (myLocation.isWithinDistance(new MapLocation(x, y), 5)) {
+                                rc.broadcast(2, 0);
+                            }
                             d = new Direction(x - myLocation.x, y - myLocation.y);
                             tryMove(d);
                             if (rc.canFireSingleShot()) {
@@ -389,7 +469,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runLumberjack() throws GameActionException {
-        System.out.println("LUMBERJACK");
+        System.out.println("I'm a lumberjack!");
         Team enemy = rc.getTeam().opponent();
 
         // The code you want your robot to perform every round should be in this
@@ -409,12 +489,28 @@ public strictfp class RobotPlayer {
                 RobotInfo[] robots = rc.senseNearbyRobots(
                         RobotType.LUMBERJACK.bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS, enemy);
 
-                if (robots.length > 0 && !rc.hasAttacked()) {
-                    // Use strike() to hit all nearby robots!
-                    rc.strike();
-                    rc.broadcast(2, rc.getRoundNum());
-                    rc.broadcast(3, (int) myLocation.x);
-                    rc.broadcast(4, (int) myLocation.y);
+                TreeInfo[] trees = rc.senseNearbyTrees();
+                if (trees.length > 0) {
+                    int closest_index=0;
+                    float mindist=10000000;
+                    for (int x = 0; x < trees.length; x++) {
+                        TreeInfo this_tree = trees[x];
+                        if (this_tree.getTeam() != rc.getTeam()) {
+                            float distance_to = myLocation.distanceSquaredTo(this_tree.location);
+                            if (mindist<distance_to) {
+                                closest_index = x;
+                                mindist = distance_to;
+                            }
+                            if (rc.canChop(this_tree.ID)) {
+                                rc.chop(this_tree.ID);
+                            }
+                        }else if(!rc.hasMoved()) {
+                            tryMove(myLocation.directionTo(trees[closest_index].location));
+                        }
+                    }
+                    if(!rc.hasMoved()) {
+                        tryMove(myLocation.directionTo(trees[closest_index].location));
+                    }
                 } else {
                     // No close robots, so search for robots within sight radius
                     robots = rc.senseNearbyRobots(-1, enemy);
@@ -422,6 +518,13 @@ public strictfp class RobotPlayer {
                     // If there is a robot, move towards it
 
                     if (robots.length > 0) {
+                        if (!rc.hasAttacked()){
+                            // Use strike() to hit all nearby robots!
+                            rc.strike();
+                            rc.broadcast(2, rc.getRoundNum());
+                            rc.broadcast(3, (int) myLocation.x);
+                            rc.broadcast(4, (int) myLocation.y);
+                        }
                         MapLocation enemyLocation = robots[0].getLocation();
                         Direction toEnemy = myLocation.directionTo(enemyLocation);
                         rc.broadcast(2, rc.getRoundNum());
@@ -429,16 +532,22 @@ public strictfp class RobotPlayer {
                         rc.broadcast(4, (int) enemyLocation.y);
                         if (!rc.hasMoved())
                             tryMove(toEnemy);
-                    } else if (!rc.hasMoved()) {
-                        Direction d = randomDirection();
+                    } else {
 
-                        if (rc.readBroadcast(2) >= rc.getRoundNum() - 1) {
-                            int x = rc.readBroadcast(3);
-                            int y = rc.readBroadcast(4);
-                            d = new Direction(x - myLocation.x, y - myLocation.y);
+                        if (!rc.hasMoved()) {
+
+                            Direction d = randomDirection();
+                            if (rc.readBroadcast(2) != 0) {
+                                int x = rc.readBroadcast(3);
+                                int y = rc.readBroadcast(4);
+                                if (myLocation.isWithinDistance(new MapLocation(x, y), 5)) {
+                                    rc.broadcast(2, 0);
+                                }
+                                d = new Direction(x - myLocation.x, y - myLocation.y);
+                            }
+                            tryMove(d, 180,10);
+
                         }
-                        tryMove(d);
-
                     }
 
                 }
@@ -448,7 +557,7 @@ public strictfp class RobotPlayer {
                 Clock.yield();
 
             } catch (Exception e) {
-                System.out.println("LUMBERJACK EXCEPTION");
+                System.out.println("Lumberjack Exception");
                 e.printStackTrace();
             }
         }

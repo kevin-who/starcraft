@@ -46,7 +46,6 @@ public class FastMath {
 				- .64596371106) * x2
 				+ 1.57079631847) * x;
 	}
-
 	// Generate and test the lookup strings
 	/*public static void main(String[] args) {
 		// generate strings

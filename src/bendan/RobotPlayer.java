@@ -207,6 +207,16 @@ public strictfp class RobotPlayer {
 
 				ti = rc.senseNearbyTrees(-1, rc.getTeam());
 
+				int close_trees= 0;
+
+                for (int x = 0; x < ti.length; x++) {
+                    TreeInfo this_tree = ti[x];
+                        float distance_to = myLocation.distanceSquaredTo(this_tree.location);
+                        if (distance_to<5) {
+                            close_trees++;
+                        }
+                }
+
 				float min = 50f;
 				for (TreeInfo t : ti) {
 					if (t.health < min) {
@@ -216,7 +226,7 @@ public strictfp class RobotPlayer {
 						rc.water(t.ID);
 				}
 
-				if (tree < 5 && rc.canPlantTree(dir)) {
+				if (close_trees < 5 && rc.canPlantTree(dir)) {
 					rc.plantTree(dir);
 					dir = dir.rotateLeftDegrees(60);
 					tree++;
@@ -476,7 +486,9 @@ public strictfp class RobotPlayer {
 							if (rc.canChop(this_tree.ID)) {
 								rc.chop(this_tree.ID);
 							}
-						}
+						}else{
+						    rc.move(randomDirection());
+                        }
 					}
 					if(!rc.hasMoved()) {
 						tryMove(myLocation.directionTo(trees[closest_index].location));
@@ -484,7 +496,7 @@ public strictfp class RobotPlayer {
 				} else {
 					// No close robots, so search for robots within sight radius
 					robots = rc.senseNearbyRobots(-1, enemy);
-
+                    RobotInfo[] friends = rc.senseNearbyRobots(-1, rc.getTeam());
 					// If there is a robot, move towards it
 
 					if (robots.length > 0) {
