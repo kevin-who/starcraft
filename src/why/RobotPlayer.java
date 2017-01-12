@@ -76,6 +76,7 @@ public strictfp class RobotPlayer {
 	static void runArchon() throws GameActionException {
 		System.out.println("I'm an archon!");
 		Team enemy = rc.getTeam().opponent();
+		MapLocation enemyLocation = rc.getInitialArchonLocations(enemy)[0];
 
 		// The code you want your robot to perform every round should be in this
 		// loop
@@ -90,14 +91,13 @@ public strictfp class RobotPlayer {
 				RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
 
 				if (robots.length > 0) {
-					MapLocation enemyLocation = robots[0].getLocation();
+					enemyLocation = robots[0].getLocation();
 					rc.broadcast(2, rc.getRoundNum());
 					rc.broadcast(3, (int) enemyLocation.x);
 					rc.broadcast(4, (int) enemyLocation.y);
 
 				}
 				if (rc.getRoundNum() < 10) {
-					MapLocation enemyLocation = rc.getInitialArchonLocations(enemy)[0];
 					rc.broadcast(2, rc.getRoundNum());
 					rc.broadcast(3, (int) enemyLocation.x);
 					rc.broadcast(4, (int) enemyLocation.y);
@@ -108,8 +108,9 @@ public strictfp class RobotPlayer {
 				if (!rc.hasMoved())
 					tryMove(dir);
 
-				// Randomly attempt to build a gardener in this direction
-				if (rc.canHireGardener(dir) && (FastMath.rand256() < 4 || rc.getRoundNum() < 200)) {
+				dir = myLocation.directionTo(enemyLocation);
+				if (rc.canHireGardener(dir) && (rc.getRoundNum() < 200
+						|| (rc.getRoundNum() > 250 && FastMath.rand256() < 12) || FastMath.rand256() < 4)) {
 					rc.hireGardener(dir);
 				}
 
@@ -134,30 +135,50 @@ public strictfp class RobotPlayer {
 		}
 	}
 
-	static void runGardener() throws GameActionException {
-		System.out.println("I'm a gardener!");
-		Team enemy = rc.getTeam().opponent();
-		int tree = 0;
+	static void proxy() throws GameActionException {
 
-		Direction dir = randomDirection();
+		Team enemy = rc.getTeam().opponent();
+		MapLocation target = rc.getInitialArchonLocations(enemy)[0];
+
+		myLocation = rc.getLocation();
+
+		int tries = 0;
+		int offset = FastMath.rand256() % 1 == 0 ? 35 : -35;
+		Direction dir = myLocation.directionTo(target).rotateLeftDegrees(offset);
 
 		while (true) {
-
 			// Try/catch blocks stop unhandled exceptions, which cause your
 			// robot to explode
 			try {
-				if (rc.senseNearbyRobots(5f).length <= 1 && rc.canPlantTree(dir)
-						&& rc.canPlantTree(dir.rotateLeftRads(60)) && rc.canPlantTree(dir.rotateLeftRads(120))
-						&& rc.canPlantTree(dir.rotateLeftRads(180)) && rc.canPlantTree(dir.rotateLeftRads(240))
-						&& rc.canPlantTree(dir.rotateLeftRads(300)))
-					break;
-
-				if (rc.getTeamBullets() > 50 && !rc.hasMoved())
-					if (!tryMove(dir, 0, 0)) {
-						dir = randomDirection();
+				myLocation = rc.getLocation();
+				if (tries < 100) {
+					boolean dist = myLocation.distanceTo(target) < 35;
+					if (dist && rc.senseNearbyRobots(5f).length <= 1 && rc.canPlantTree(dir)
+							&& rc.canPlantTree(dir.rotateLeftRads(60)) && rc.canPlantTree(dir.rotateLeftRads(120))
+							&& rc.canPlantTree(dir.rotateLeftRads(180)) && rc.canPlantTree(dir.rotateLeftRads(240))
+							&& rc.canPlantTree(dir.rotateLeftRads(300)))
+						break;
+					else if (rc.getTeamBullets() > 50 && dist) {
+						if (!tryMove(randomDirection(), 0, 0))
+							dir = randomDirection();
+					} else if (rc.getTeamBullets() > 50 || !dist) {
+						tryMove(myLocation.directionTo(target).rotateLeftDegrees(offset));
 					}
+					tries++;
+				} else {
+					if (rc.senseNearbyRobots(5f).length <= 1 && rc.canPlantTree(dir)
+							&& rc.canPlantTree(dir.rotateLeftRads(60)) && rc.canPlantTree(dir.rotateLeftRads(120))
+							&& rc.canPlantTree(dir.rotateLeftRads(180)) && rc.canPlantTree(dir.rotateLeftRads(240))
+							&& rc.canPlantTree(dir.rotateLeftRads(300)))
+						break;
 
-				// Clock.yield() makes the robot wait until the next turn, then
+					if (rc.getTeamBullets() > 50 && !rc.hasMoved())
+						if (!tryMove(dir, 0, 0))
+							dir = randomDirection();
+
+				}
+				// Clock.yield() makes the robot wait until the next turn,
+				// then
 				// it will perform this loop again
 				Clock.yield();
 
@@ -167,13 +188,11 @@ public strictfp class RobotPlayer {
 			}
 		}
 
-		// The code you want your robot to perform every round should be in this
-		// loop
+		int tree = 0;
 		TreeInfo[] ti;
+		dir = myLocation.directionTo(target).rotateLeftDegrees(30);
 		while (true) {
 
-			// Try/catch blocks stop unhandled exceptions, which cause your
-			// robot to explode
 			try {
 				if ((int) (rc.getTeamBullets() / 10) + rc.getTeamVictoryPoints() >= 1000) {
 
@@ -191,7 +210,7 @@ public strictfp class RobotPlayer {
 
 				}
 
-				ti = rc.senseNearbyTrees(-1, rc.getTeam());
+				ti = rc.senseNearbyTrees(2, rc.getTeam());
 
 				float min = 50f;
 				for (TreeInfo t : ti) {
@@ -208,25 +227,120 @@ public strictfp class RobotPlayer {
 					tree++;
 
 				} else {
-					if (rc.canBuildRobot(RobotType.SOLDIER, dir) && FastMath.rand256() < 12) {
-						rc.buildRobot(RobotType.SOLDIER, dir);
-					} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && FastMath.rand256() < 6
-							&& rc.isBuildReady()) {
+					if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && rc.isBuildReady()) {
 						rc.buildRobot(RobotType.LUMBERJACK, dir);
-					} else if (rc.canBuildRobot(RobotType.SCOUT, dir) && FastMath.rand256() < 3 && rc.isBuildReady()) {
-						rc.buildRobot(RobotType.SCOUT, dir);
-					} else if (rc.canBuildRobot(RobotType.TANK, dir) && FastMath.rand256() < 3 && rc.isBuildReady()) {
-						rc.buildRobot(RobotType.TANK, dir);
 					}
 				}
 
-				// Clock.yield() makes the robot wait until the next turn, then
-				// it will perform this loop again
 				Clock.yield();
 
 			} catch (Exception e) {
 				System.out.println("Gardener Exception");
 				e.printStackTrace();
+			}
+		}
+	}
+
+	static void runGardener() throws GameActionException {
+		System.out.println("I'm a gardener!");
+
+		if (rc.getRoundNum() > 3 && (rc.getRoundNum() < 100 || FastMath.rand256() < 60)) {
+			proxy();
+		} else {
+			Team enemy = rc.getTeam().opponent();
+			int tree = 0;
+			Direction dir = randomDirection();
+			while (true) {
+				// Try/catch blocks stop unhandled exceptions, which cause your
+				// robot to explode
+				try {
+					if (rc.senseNearbyRobots(5f).length <= 1 && rc.canPlantTree(dir)
+							&& rc.canPlantTree(dir.rotateLeftRads(60)) && rc.canPlantTree(dir.rotateLeftRads(120))
+							&& rc.canPlantTree(dir.rotateLeftRads(180)) && rc.canPlantTree(dir.rotateLeftRads(240))
+							&& rc.canPlantTree(dir.rotateLeftRads(300)))
+						break;
+
+					if (rc.getTeamBullets() > 50 && !rc.hasMoved())
+						if (!tryMove(dir, 0, 0)) {
+							dir = randomDirection();
+						}
+
+					// Clock.yield() makes the robot wait until the next turn,
+					// then
+					// it will perform this loop again
+					Clock.yield();
+
+				} catch (Exception e) {
+					System.out.println("Gardener Exception");
+					e.printStackTrace();
+				}
+			}
+
+			// The code you want your robot to perform every round should be in
+			// this
+			// loop
+			TreeInfo[] ti;
+			MapLocation target = rc.getInitialArchonLocations(enemy)[0];
+			myLocation = rc.getLocation();
+			dir = myLocation.directionTo(target).rotateLeftDegrees(30);
+			while (true) {
+
+				// Try/catch blocks stop unhandled exceptions, which cause your
+				// robot to explode
+				try {
+					if ((int) (rc.getTeamBullets() / 10) + rc.getTeamVictoryPoints() >= 1000) {
+
+						rc.donate(rc.getTeamBullets());
+					}
+					myLocation = rc.getLocation();
+
+					RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
+
+					if (robots.length > 0) {
+						MapLocation enemyLocation = robots[0].getLocation();
+						rc.broadcast(2, rc.getRoundNum());
+						rc.broadcast(3, (int) enemyLocation.x);
+						rc.broadcast(4, (int) enemyLocation.y);
+
+					}
+
+					ti = rc.senseNearbyTrees(2, rc.getTeam());
+
+					float min = 50f;
+					for (TreeInfo t : ti) {
+						if (t.health < min) {
+							min = t.health;
+						}
+						if (t.health < 40 && rc.canWater(t.ID))
+							rc.water(t.ID);
+					}
+
+					if (tree < 5 && rc.canPlantTree(dir)) {
+						rc.plantTree(dir);
+						dir = dir.rotateLeftDegrees(60);
+						tree++;
+
+					} else {
+						if (rc.canBuildRobot(RobotType.SOLDIER, dir) && FastMath.rand256() < 30) {
+							rc.buildRobot(RobotType.SOLDIER, dir);
+						} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && FastMath.rand256() < 2
+								&& rc.isBuildReady()) {
+							rc.buildRobot(RobotType.LUMBERJACK, dir);
+						} else if (rc.canBuildRobot(RobotType.SCOUT, dir) && FastMath.rand256() < 1
+								&& rc.isBuildReady()) {
+							rc.buildRobot(RobotType.SCOUT, dir);
+						}
+					}
+
+					// Clock.yield() makes the robot wait until the next turn,
+					// then
+					// it will perform this loop again
+					Clock.yield();
+
+				} catch (Exception e) {
+					System.out.println("Gardener Exception");
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -493,11 +607,14 @@ public strictfp class RobotPlayer {
 									}
 									if (rc.canChop(this_tree.ID)) {
 										rc.chop(this_tree.ID);
+										move = false;
 									}
 								}
 							}
-							if (!rc.hasMoved() && mindist > 1 && !trees[closest_index].getTeam().equals(rc.getTeam())) {
-								tryMove(myLocation.directionTo(trees[closest_index].location), 90, 4);
+							boolean far = mindist > (RobotType.LUMBERJACK.bodyRadius + trees[closest_index].radius);
+							if (!rc.hasMoved() && move && far && !trees[closest_index].getTeam().equals(rc.getTeam())) {
+								tryMove(myLocation.directionTo(trees[closest_index].location));
+							} else if (!far) {
 								move = false;
 							}
 						}
@@ -546,7 +663,7 @@ public strictfp class RobotPlayer {
 	 * @throws GameActionException
 	 */
 	static boolean tryMove(Direction dir) throws GameActionException {
-		return tryMove(dir, 20, 3);
+		return tryMove(dir, 90, 4);
 	}
 
 	/**
