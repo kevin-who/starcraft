@@ -1,4 +1,4 @@
-package maping;
+package mapping;
 
 import battlecode.common.RobotController;
 
