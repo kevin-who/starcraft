@@ -116,14 +116,14 @@ public strictfp class RobotPlayer {
 					rc.hireGardener(dir);
 				}
 
-				if (!rc.hasMoved())
-					if(round%4==0){
+				if (round>100&&!rc.hasMoved()&&round%4==0){
 						dir = randomDirection();
-					}
-					tryMove(dir);
+						tryMove(dir);
 
-				if (rc.getTeamBullets() > 300)
-					rc.donate(50);
+					}
+
+				if (rc.getTeamBullets() > 200)
+					rc.donate(rc.getTeamBullets()/3);
 
 				// Clock.yield() makes the robot wait until the next turn, then
 				// it will perform this loop again
@@ -479,7 +479,7 @@ public strictfp class RobotPlayer {
 	}
 
 	static void runLumberjack() throws GameActionException {
-		System.out.println("I'm a lumberjack!");
+		System.out.println("I'm a Jinchao!");
 		Team enemy = rc.getTeam().opponent();
 		boolean move = true;
 
@@ -487,15 +487,12 @@ public strictfp class RobotPlayer {
 		// loop
 		while (true) {
 
-			if (rc.readBroadcast(10) != -1) {
-				int x = rc.readBroadcast(11);
-				int y = rc.readBroadcast(12);
-				tryMove(new Direction(x - myLocation.x, y - myLocation.y));
-			}
+
 
 			// Try/catch blocks stop unhandled exceptions, which cause your
 			// robot to explode
 			try {
+
 				if ((int) (rc.getTeamBullets() / 10) + rc.getTeamVictoryPoints() >= 1000) {
 					rc.donate(rc.getTeamBullets());
 				}
@@ -505,6 +502,12 @@ public strictfp class RobotPlayer {
 
 				myLocation = rc.getLocation();
 				dodge();
+
+				if (rc.readBroadcast(10) != -1&&!rc.hasMoved()) {
+					int x = rc.readBroadcast(11);
+					int y = rc.readBroadcast(12);
+					tryMove(new Direction(x - myLocation.x, y - myLocation.y));
+				}
 
 				RobotInfo[] robots = rc.senseNearbyRobots(
 						RobotType.LUMBERJACK.bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS, enemy);
@@ -574,7 +577,7 @@ public strictfp class RobotPlayer {
 				Clock.yield();
 
 			} catch (Exception e) {
-				System.out.println("Lumberjack Exception");
+				System.out.println("Jinchao Exception");
 				e.printStackTrace();
 			}
 		}
