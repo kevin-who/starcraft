@@ -221,7 +221,12 @@ public strictfp class RobotPlayer {
 					if (t.health < 40 && rc.canWater(t.ID))
 						rc.water(t.ID);
 				}
-				if (close_trees == 0 && far_trees == 0 && rand256() < 128) {
+
+				if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && neutral_trees > 5 && rc.isBuildReady()) {
+					rc.buildRobot(RobotType.LUMBERJACK, dir);
+				}
+
+				if (close_trees == 0 && far_trees == 0 && rand256() < 168&& rc.canPlantTree(dir)) {
 					tree_hub = true;
 				}
 
@@ -234,11 +239,11 @@ public strictfp class RobotPlayer {
 					if (tree_hub == false) {
 						tryMove(randomDirection());
 					} else {
-						if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && neutral_trees > 8 && rc.isBuildReady()) {
+						if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && neutral_trees > 5 && rc.isBuildReady()) {
 							rc.buildRobot(RobotType.LUMBERJACK, dir);
 						} else {
-							if (rc.canBuildRobot(RobotType.SOLDIER, dir) && rc.isBuildReady()) {
-								rc.buildRobot(RobotType.SOLDIER, dir);
+							if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && rc.isBuildReady()) {
+								rc.buildRobot(RobotType.LUMBERJACK, dir);
 							}
 						}
 					}
