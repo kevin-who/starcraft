@@ -201,6 +201,7 @@ public strictfp class RobotPlayer {
 
                 int close_trees= 0;
                 int far_trees = 0;
+                int neutral_trees = rc.senseNearbyTrees(-1, Team.NEUTRAL).length;
 
                 for (int x = 0; x < ti.length; x++) {
                     TreeInfo this_tree = ti[x];
@@ -232,22 +233,28 @@ public strictfp class RobotPlayer {
                 } else {
                     if (tree_hub == false){
                         tryMove(randomDirection());
-                    }
-                    if (rc.canBuildRobot(RobotType.SOLDIER, dir) &&
-                            rand256() < 16) {
-                        rc.buildRobot(RobotType.SOLDIER, dir);
-                    } else
-                         if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) &&
-                         rand256() <2 && rc.isBuildReady()) {
-                         rc.buildRobot(RobotType.LUMBERJACK, dir);
-                         }
-                         else if (rc.canBuildRobot(RobotType.SCOUT, dir) &&
-                                rand256() < 0 && rc.isBuildReady()) {
-                            rc.buildRobot(RobotType.SCOUT, dir);
-                        } else if (rc.canBuildRobot(RobotType.TANK, dir) &&
-                                rand256() < 0 && rc.isBuildReady()) {
-                            rc.buildRobot(RobotType.TANK, dir);
+                    }else {
+                        if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && neutral_trees > 5 && rc.isBuildReady()) {
+                            rc.buildRobot(RobotType.LUMBERJACK, dir);
+                        } else {
+                            if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && rc.isBuildReady()) {
+                                rc.buildRobot(RobotType.LUMBERJACK, dir);
+                            }
                         }
+                    }
+//                        rc.buildRobot(RobotType.SOLDIER, dir);
+//                    } else
+//                         if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) &&
+//                         rand256() <4 && rc.isBuildReady()) {
+//                         rc.buildRobot(RobotType.LUMBERJACK, dir);
+//                         }
+//                         else if (rc.canBuildRobot(RobotType.SCOUT, dir) &&
+//                                rand256() < 0 && rc.isBuildReady()) {
+//                            rc.buildRobot(RobotType.SCOUT, dir);
+//                        } else if (rc.canBuildRobot(RobotType.TANK, dir) &&
+//                                rand256() < 0 && rc.isBuildReady()) {
+//                            rc.buildRobot(RobotType.TANK, dir);
+//                        }
                 }
 
                 // Clock.yield() makes the robot wait until the next turn, then
@@ -512,7 +519,7 @@ public strictfp class RobotPlayer {
                                 TreeInfo this_tree = trees[x];
                                 if (!this_tree.getTeam().equals(rc.getTeam())) {
                                     float distance_to = myLocation.distanceSquaredTo(this_tree.location);
-                                    if (mindist < distance_to) {
+                                    if (mindist > distance_to) {
                                         closest_index = x;
                                         mindist = distance_to;
                                     }
