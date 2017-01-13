@@ -17,10 +17,6 @@ public strictfp class RobotPlayer {
 
 	static MapLocation myLocation;
 
-	/**
-	 * run() is the method that is called when a robot is instantiated in the
-	 * Battlecode world. If this method returns, the robot dies!
-	 **/
 	public static void run(RobotController rc) throws GameActionException {
 
 		RobotPlayer.rc = rc;
@@ -77,7 +73,18 @@ public strictfp class RobotPlayer {
 		System.out.println("I'm an archon!");
 		Team team = rc.getTeam();
 		Team enemy = team.opponent();
-		MapLocation enemyLocation = rc.getInitialArchonLocations(enemy)[0];
+		myLocation = rc.getLocation();
+		MapLocation[] enemies = rc.getInitialArchonLocations(enemy);
+		int closest = 0;
+		float min = 10000000;
+		for (int e = 0; e < enemies.length; e++) {
+			float temp = myLocation.distanceTo(enemies[e]);
+			if (temp < min) {
+				closest = e;
+				min = temp;
+			}
+		}
+		MapLocation enemyLocation = rc.getInitialArchonLocations(enemy)[closest];
 
 		// The code you want your robot to perform every round should be in this
 		// loop
@@ -103,13 +110,12 @@ public strictfp class RobotPlayer {
 				Direction dir = randomDirection();
 
 				if (!rc.hasMoved())
-					tryMove(dir);
+					tryMove(dir, 0, 0);
 
 				dir = myLocation.directionTo(enemyLocation);
 				if (rc.getRobotCount() < 2 && rc.canHireGardener(dir)) {
 					rc.hireGardener(dir);
-				} else if (rc.canHireGardener(dir) && rc.getTreeCount() > 4
-						&& rc.senseNearbyRobots(-1, team).length < 3) {
+				} else if (rc.canHireGardener(dir) && rc.getTreeCount() > 1 && FastMath.rand256() < 30) {
 					rc.hireGardener(dir);
 				}
 
@@ -257,11 +263,9 @@ public strictfp class RobotPlayer {
 					}
 
 				} else {
-					 if (rc.canBuildRobot(RobotType.SOLDIER, dir) &&
-					 FastMath.rand256() < 60) {
-					 rc.buildRobot(RobotType.SOLDIER, dir);
-					 } else
-					if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && FastMath.rand256() < 100) {
+					if (rc.canBuildRobot(RobotType.SOLDIER, dir) && FastMath.rand256() < 60) {
+						rc.buildRobot(RobotType.SOLDIER, dir);
+					} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && FastMath.rand256() < 100) {
 						rc.buildRobot(RobotType.LUMBERJACK, dir);
 					} else if (rc.canBuildRobot(RobotType.SCOUT, dir) && FastMath.rand256() < 3) {
 						rc.buildRobot(RobotType.SCOUT, dir);
@@ -314,20 +318,33 @@ public strictfp class RobotPlayer {
 					rc.broadcast(2, rc.getRoundNum());
 					rc.broadcast(3, (int) enemyLocation.x);
 					rc.broadcast(4, (int) enemyLocation.y);
+					boolean isZerg = robots[0].getType().equals(RobotType.LUMBERJACK);
 					if (!rc.hasMoved()) {
-						tryMove(toEnemy);
+						if (!isZerg)
+							tryMove(toEnemy);
+						else
+							tryMove(toEnemy.opposite());
 					}
-
 					myLocation = rc.getLocation();
 					toEnemy = myLocation.directionTo(enemyLocation);
 
 					int d = (int) myLocation.distanceTo(enemyLocation);
-					if (d < 3 && rc.canFirePentadShot())
-						rc.firePentadShot(toEnemy);
-					else if (d < 5 && rc.canFireTriadShot()) {
-						rc.fireTriadShot(toEnemy);
-					} else if (rc.canFireSingleShot()) {
-						rc.fireSingleShot(toEnemy);
+					if (isZerg) {
+						if (d <2 &&rc.canFirePentadShot())
+							rc.firePentadShot(toEnemy);
+						else if (rc.canFireTriadShot()) {
+							rc.fireTriadShot(toEnemy);
+						} else if (rc.canFireSingleShot()) {
+							rc.fireSingleShot(toEnemy);
+						}
+					} else {
+						if (d < 2 && rc.canFirePentadShot())
+							rc.firePentadShot(toEnemy);
+						else if (d < 4 && rc.canFireTriadShot()) {
+							rc.fireTriadShot(toEnemy);
+						} else if (rc.canFireSingleShot()) {
+							rc.fireSingleShot(toEnemy);
+						}
 					}
 				} else {
 
