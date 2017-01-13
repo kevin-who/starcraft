@@ -38,7 +38,7 @@ public class FastMath {
 	public static int rand256() {
 		return lookupRand256.charAt(randIndex++);
 	}
-	static double xsin (double x) {
+	public static double xsin (double x) {
 		double x2 = x * x;
 		return ((((.00015148419 * x2
 				- .00467376557) * x2
