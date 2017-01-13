@@ -30,7 +30,7 @@ public class Soldier {
 			// Try/catch blocks stop unhandled exceptions, which cause your
 			// robot to explode
 			try {
-
+				
 				if ((int) (rc.getTeamBullets() / 10) + rc.getTeamVictoryPoints() >= 1000) {
 
 					rc.donate(rc.getTeamBullets());

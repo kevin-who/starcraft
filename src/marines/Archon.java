@@ -71,6 +71,7 @@ public class Archon {
 					if (rc.getTeamBullets() > 60)
 						rc.donate(20);
 				}
+				
 				float ammo = rc.getTeamBullets();
 				if ((int) (ammo / 10) + rc.getTeamVictoryPoints() >= 1000) {
 					rc.donate(rc.getTeamBullets());

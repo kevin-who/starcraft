@@ -141,11 +141,14 @@ public class Gardener {
 				} else {
 					if (rc.canBuildRobot(RobotType.SOLDIER, dir) && FastMath.rand256() < 60) {
 						rc.buildRobot(RobotType.SOLDIER, dir);
-					} else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && FastMath.rand256() < 100) {
-						rc.buildRobot(RobotType.LUMBERJACK, dir);
-					} else if (rc.canBuildRobot(RobotType.SCOUT, dir) && FastMath.rand256() < 3) {
-						rc.buildRobot(RobotType.SCOUT, dir);
-					}
+					} 
+					// else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) &&
+					// FastMath.rand256() < 100) {
+					// rc.buildRobot(RobotType.LUMBERJACK, dir);
+					// } else if (rc.canBuildRobot(RobotType.SCOUT, dir) &&
+					// FastMath.rand256() < 3) {
+					// rc.buildRobot(RobotType.SCOUT, dir);
+					// }
 				}
 
 				Clock.yield();
