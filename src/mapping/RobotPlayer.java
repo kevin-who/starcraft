@@ -75,6 +75,7 @@ public strictfp class RobotPlayer {
 		Team enemy = team.opponent();
 		myLocation = rc.getLocation();
 		MapLocation[] enemies = rc.getInitialArchonLocations(enemy);
+		int number = enemies.length;
 		int closest = 0;
 		float min = 10000000;
 		for (int e = 0; e < enemies.length; e++) {
@@ -113,7 +114,7 @@ public strictfp class RobotPlayer {
 					tryMove(dir, 0, 0);
 
 				dir = myLocation.directionTo(enemyLocation);
-				if (rc.getRobotCount() < 2 && rc.canHireGardener(dir)) {
+				if (rc.getRobotCount() < 2 * number && rc.canHireGardener(dir)) {
 					rc.hireGardener(dir);
 				} else if (rc.canHireGardener(dir) && rc.getTreeCount() > 1 && FastMath.rand256() < 30) {
 					rc.hireGardener(dir);
@@ -330,7 +331,7 @@ public strictfp class RobotPlayer {
 
 					int d = (int) myLocation.distanceTo(enemyLocation);
 					if (isZerg) {
-						if (d <2 &&rc.canFirePentadShot())
+						if (d < 2 && rc.canFirePentadShot())
 							rc.firePentadShot(toEnemy);
 						else if (rc.canFireTriadShot()) {
 							rc.fireTriadShot(toEnemy);
