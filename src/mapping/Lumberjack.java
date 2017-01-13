@@ -21,10 +21,8 @@ public class Lumberjack {
 
 	void phase1() {
 		boolean move = true;
-
-		// The code you want your robot to perform every round should be in this
-		// loop
 		TreeInfo[] trees = rc.senseNearbyTrees(5, Team.NEUTRAL);
+		int limit = 0;
 		if (trees.length > 0) {
 			while (true) {
 				try {
@@ -70,9 +68,9 @@ public class Lumberjack {
 					} else if (!far) {
 						move = false;
 					}
-					if (done >= trees.length)
+					if (done >= trees.length || limit > 125)
 						break;
-
+					limit++;
 					Clock.yield();
 
 				} catch (Exception e) {
@@ -102,7 +100,8 @@ public class Lumberjack {
 				// (distance 1 from lumberjack's radius)
 
 				myLocation = rc.getLocation();
-				dodge(rc, myLocation);
+				if (!rc.hasMoved())
+					dodge(rc, myLocation);
 
 				RobotInfo[] robots = rc.senseNearbyRobots(
 						RobotType.LUMBERJACK.bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS, enemy);
