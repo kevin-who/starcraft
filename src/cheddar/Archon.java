@@ -62,10 +62,9 @@ public class Archon {
                 if (round>100&&!rc.hasMoved()&&round%4==0){
                     dir = randomDirection();
                     tryMove(rc,dir);
-
                 }
 
-                if (rc.getTeamBullets() > 200)
+                if (rc.getTeamBullets() > 150)
                     rc.donate(rc.getTeamBullets()/3);
 
                 // Clock.yield() makes the robot wait until the next turn, then

@@ -4,12 +4,7 @@ import static mapping.Global.dodge;
 import static mapping.Global.randomDirection;
 import static mapping.Global.tryMove;
 
-import battlecode.common.Clock;
-import battlecode.common.Direction;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
-import battlecode.common.RobotInfo;
-import battlecode.common.Team;
+import battlecode.common.*;
 
 public class Scout {
 	
@@ -28,6 +23,7 @@ public class Scout {
 			// Try/catch blocks stop unhandled exceptions, which cause your
 			// robot to explode
 			try {
+				MapLocation[] targets = rc.getInitialArchonLocations(enemy);
 				if ((int) (rc.getTeamBullets() / 10) + rc.getTeamVictoryPoints() >= 1000) {
 
 					rc.donate(rc.getTeamBullets());
@@ -42,7 +38,7 @@ public class Scout {
 					// And we have enough bullets, and haven't attacked yet this
 					// turn...
 					MapLocation enemyLocation = robots[0].getLocation();
-					Direction toEnemy = myLocation.directionTo(enemyLocation);
+					Direction toEnemy = myLocation.directionTo(targets[0]);
 
 					rc.broadcast(2, rc.getRoundNum());
 					rc.broadcast(3, (int) enemyLocation.x);

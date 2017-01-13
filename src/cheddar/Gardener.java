@@ -1,6 +1,8 @@
 package cheddar;
 
 import battlecode.common.*;
+
+import static cheddar.FastMath.rand256;
 import static cheddar.Global.*;
 
 /**
@@ -53,9 +55,12 @@ public class Gardener {
         TreeInfo[] ti;
         while (true) {
 
+
             // Try/catch blocks stop unhandled exceptions, which cause your
             // robot to explode
             try {
+                int round = rc.getRoundNum();
+
                 //
                 // float archon_dist = 0;
                 //
@@ -110,12 +115,21 @@ public class Gardener {
                         rc.water(t.ID);
                 }
 
-                if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && neutral_trees > 5 && rc.isBuildReady()) {
-                    rc.buildRobot(RobotType.LUMBERJACK, dir);
+                if (neutral_trees > 2 && rc.isBuildReady()) {
+                    for(int x = 0; x < 12; x++) {
+                        dir = dir.rotateLeftDegrees(30);
+                        if(rc.canBuildRobot(RobotType.LUMBERJACK, dir)){
+                            rc.buildRobot(RobotType.LUMBERJACK, dir);
+                            System.out.println("DESTROY THE FOREST");
+                        }
+                    }
                 }
 
                 if (close_trees == 0 && far_trees == 0 && rc.canPlantTree(dir)) {
                     tree_hub = true;
+                    if (rc.canBuildRobot(RobotType.LUMBERJACK, dir)) {
+                        rc.buildRobot(RobotType.LUMBERJACK, dir);
+                    }
                 }
 
                 if (tree_hub == true && close_trees < 5 && rc.canPlantTree(dir)) {
@@ -124,10 +138,13 @@ public class Gardener {
                     close_trees++;
 
                 } else {
-                    if (tree_hub == false) {
+                    if (tree_hub == false&&rc.canBuildRobot(RobotType.LUMBERJACK, dir) && round<100 && rc.isBuildReady() && rand256()<128) {
+                        rc.buildRobot(RobotType.LUMBERJACK, dir);
+                    }
+                    else if (tree_hub == false&& rand256()>128) {
                         tryMove(rc,randomDirection());
                     } else {
-                        if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && neutral_trees > 5 && rc.isBuildReady()) {
+                        if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && (neutral_trees > 5||rand256()<128) && rc.isBuildReady()) {
                             rc.buildRobot(RobotType.LUMBERJACK, dir);
                         } else {
                             if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && rc.isBuildReady()) {

@@ -2,9 +2,7 @@ package cheddar;
 
 import battlecode.common.*;
 
-import static cheddar.Global.dodge;
-import static cheddar.Global.randomDirection;
-import static cheddar.Global.tryMove;
+import static cheddar.Global.*;
 
 /**
  * Created by kevinhu on 1/12/17.
@@ -22,57 +20,62 @@ public class Scout {
     public void run() {
         System.out.println("SCOUT");
         Team enemy = rc.getTeam().opponent();
+        MapLocation[] targets = rc.getInitialArchonLocations(enemy);
+
+
 
         // The code you want your robot to perform every round should be in this
         // loop
         while (true) {
-
             // Try/catch blocks stop unhandled exceptions, which cause your
             // robot to explode
             try {
-                myLocation = rc.getLocation();
-                dodge(rc,myLocation);
-                // See if there are any nearby enemy robots
-                RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
-
-                // If there are some...
-                if (robots.length > 0) {
-                    // And we have enough bullets, and haven't attacked yet this
-                    // turn...
-                    MapLocation enemyLocation = robots[0].getLocation();
-                    Direction toEnemy = myLocation.directionTo(enemyLocation);
-
-                    if (rc.canFireSingleShot()) {
-                        rc.fireSingleShot(toEnemy);
-                    }
-                    rc.broadcast(2, rc.getRoundNum());
-                    rc.broadcast(3, (int) enemyLocation.x);
-                    rc.broadcast(4, (int) enemyLocation.y);
-
-                    if (!rc.hasMoved()) {
-                        if (myLocation.distanceTo(enemyLocation) > 9)
-                            tryMove(rc,toEnemy);
-                        else
-                            tryMove(rc,toEnemy.opposite());
-                    }
-                } else {
-
-                    Direction d = randomDirection();
-                    try {
-                        if (rc.readBroadcast(2) >= rc.getRoundNum() - 1) {
-                            int x = rc.readBroadcast(3);
-                            int y = rc.readBroadcast(4);
-                            d = new Direction(x - myLocation.x, y - myLocation.y);
-                        }
-                    } catch (GameActionException e) {
-
-                    }
-                    if (!rc.hasMoved())
-                        tryMove(rc,d);
+                if (!rc.hasMoved()) {
+                    dodge(rc, myLocation);
                 }
-                // Clock.yield() makes the robot wait until the next turn, then
-                // it will perform this loop again
-                Clock.yield();
+
+                myLocation = rc.getLocation();
+
+                if (rc.readBroadcast(2) >= rc.getRoundNum() - 1) {
+                    int x = rc.readBroadcast(3);
+                    int y = rc.readBroadcast(4);
+                    if (!rc.hasMoved()) {
+                        tryMove(rc, new Direction(x - myLocation.x, y - myLocation.y));
+                    }
+                }
+
+                MapLocation enemyBase = targets[0];
+                Direction toBase = myLocation.directionTo(enemyBase);
+
+                RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
+                RobotInfo enemyGardener;
+
+                for (int x = 0; x < robots.length; x++) {
+                    RobotInfo this_bot = robots[x];
+                    if (this_bot.getType() == RobotType.LUMBERJACK) {
+                        enemyGardener = this_bot;
+                        MapLocation gardenerLocation = enemyGardener.getLocation();
+                        Direction toGardener = myLocation.directionTo(gardenerLocation);
+
+                        rc.broadcast(2, rc.getRoundNum());
+                        rc.broadcast(3, (int) gardenerLocation.x);
+                        rc.broadcast(4, (int) gardenerLocation.y);
+                        if (!rc.hasMoved()) {
+                            if (myLocation.distanceTo(gardenerLocation) > 12)
+                                tryMove(rc, toGardener);
+                            else
+                                tryMove(rc, toGardener.opposite());
+                        }
+                        if (rc.canFireSingleShot()) {
+                            rc.fireSingleShot(toGardener);
+                        }
+                        break;
+                    }
+                }
+
+                if (!rc.hasMoved()) {
+                    tryMove(rc, randomDirection());
+                }
 
             } catch (Exception e) {
                 System.out.println("SCOUT EXCEPTION");
