@@ -15,7 +15,7 @@ public class Bug {
 	public static RobotController rc;
 
 	static boolean tryMove(RobotController rc, Direction dir) throws GameActionException {
-		return tryMove(rc, dir, 20, 3);
+		return tryMove(rc, dir, 10,4);
 	}
 
 	static boolean tryMove(RobotController rc, Direction dir, float degreeOffset, int checksPerSide)
@@ -63,7 +63,7 @@ public class Bug {
 				startTracing();
 			}
 		} else if (here.distanceSquaredTo(dest) < closestDistWhileBugging) {
-			rc.setIndicatorDot(here.add(here.directionTo(dest)), 128, 0, 0);
+			rc.setIndicatorDot(here.add(here.directionTo(dest)), 0, 128, 0);
 			if (tryMove(rc, here.directionTo(dest))) {
 				tracing = false;
 				return;
@@ -81,11 +81,13 @@ public class Bug {
 
 	static void traceMove() throws GameActionException {
 		Direction tryDir = here.directionTo(lastWall);
-		rc.setIndicatorDot(here.add(tryDir), 128, 0, 0);
+		rc.setIndicatorDot(lastWall, 0, 128, 128);
+		
 
-		for (int i = 0; i < 4; i++) {
-			tryDir = tryDir.rotateRightDegrees(90);
-			if (tryMove(rc, tryDir)) {
+		for (int i = 0; i < 10; i++) {
+			Direction temp = tryDir.rotateRightDegrees((90 * (i/2) * (2 * (i % 2) - 1)));
+			rc.setIndicatorLine(here, here.add(temp), 0, 0, 128);
+			if (tryMove(rc, temp)) {
 				return;
 			} else {
 				lastWall = here.add(tryDir);

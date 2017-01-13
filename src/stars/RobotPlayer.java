@@ -5,6 +5,7 @@ import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotType;
 
 public strictfp class RobotPlayer {
 	static RobotController rc;
@@ -14,32 +15,38 @@ public strictfp class RobotPlayer {
 	public static void run(RobotController rc) throws GameActionException {
 
 		MapLocation dist = rc.getInitialArchonLocations(rc.getTeam().opponent())[0];
-		//float range = rc.getType().sensorRadius;
+		// float range = rc.getType().sensorRadius;
 
-		//FastLocSet map = new FastLocSet();
-		Bug.rc = rc;
+		if (rc.getType().equals(RobotType.GARDENER)) {
+			// FastLocSet map = new FastLocSet();
+			Bug.rc = rc;
+			while (true) {
+
+				try {
+					myLocation = rc.getLocation();
+					Bug.here = myLocation;
+
+					Bug.goTo(dist);
+					if (myLocation.isWithinDistance(dist, 1)) {
+						rc.resign();
+					}
+					Clock.yield();
+
+				} catch (GameActionException e) {
+					e.printStackTrace();
+				}
+			}
+		} else {
+
+		}
 		while (true) {
+
 			try {
 				myLocation = rc.getLocation();
-				Bug.here = myLocation;
-				
-				// for (float x = -range; x < range; x++) {
-				// for (float y = -range; y < range; y++) {
-				// if (x * x + y * y <= range) {
-				// MapLocation temp = myLocation.translate(x, y);
-				// if (rc.isCircleOccupiedExceptByThisRobot(temp, 1)) {
-				// map.add(temp);
-				// } else {
-				// map.remove(temp);
-				// }
-				//
-				// }
-				// }
-				// }
-				
-				Bug.goTo(dist);
-				if(myLocation.isWithinDistance(dist, 1)){
-					rc.resign();
+				if (rc.getRobotCount() < 2) {
+					rc.buildRobot(RobotType.GARDENER, Direction.getWest());
+				} else {
+					return;
 				}
 				Clock.yield();
 
