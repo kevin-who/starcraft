@@ -80,21 +80,20 @@ public class Soldier {
 					}
 				} else {
 
-					Direction d = Global.rndDir();
-					try {
+					if (!rc.hasMoved()) {
 						if (rc.readBroadcast(2) != 0) {
 							int x = rc.readBroadcast(3);
 							int y = rc.readBroadcast(4);
 							if (myLoc.isWithinDistance(new MapLocation(x, y), 5)) {
 								rc.broadcast(2, 0);
+							} else {
+								Global.goTo(new MapLocation(x, y));
 							}
-							d = new Direction(x - myLoc.x, y - myLoc.y);
-						}
-					} catch (GameActionException e) {
 
+						} else {
+							Global.tryMove(Global.rndDir());
+						}
 					}
-					if (!rc.hasMoved())
-						Global.tryMove(d);
 					if (!rc.hasAttacked()) {
 						myLoc = rc.getLocation();
 

@@ -94,7 +94,7 @@ public class Lumberjack {
 				move = true;
 				if (!rc.hasMoved())
 					Global.dodge();
-				
+
 				if ((int) (rc.getTeamBullets() / 10) + rc.getTeamVictoryPoints() >= 1000) {
 					rc.donate(rc.getTeamBullets());
 				}
@@ -148,18 +148,18 @@ public class Lumberjack {
 							}
 						}
 						if (!rc.hasMoved() && move) {
-
-							Direction d = Global.rndDir();
 							if (rc.readBroadcast(2) != 0) {
 								int x = rc.readBroadcast(3);
 								int y = rc.readBroadcast(4);
 								if (myLoc.isWithinDistance(new MapLocation(x, y), 5)) {
 									rc.broadcast(2, 0);
+								} else {
+									Global.goTo(new MapLocation(x, y));
 								}
-								d = new Direction(x - myLoc.x, y - myLoc.y);
-							}
-							Global.tryMove(d);
 
+							} else {
+								Global.tryMove(Global.rndDir());
+							}
 						}
 					}
 

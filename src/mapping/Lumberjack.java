@@ -142,13 +142,12 @@ public class Lumberjack {
 							}
 							boolean far = mindist > (RobotType.LUMBERJACK.bodyRadius + trees[closest_index].radius);
 							if (!rc.hasMoved() && move && far && !trees[closest_index].getTeam().equals(rc.getTeam())) {
-								Global.tryMove( myLocation.directionTo(trees[closest_index].location));
+								Global.tryMove(myLocation.directionTo(trees[closest_index].location));
 							} else if (!far) {
 								move = false;
 							}
 						}
 						if (!rc.hasMoved() && move) {
-
 							Direction d = Global.rndDir();
 							if (rc.readBroadcast(2) != 0) {
 								int x = rc.readBroadcast(3);
@@ -157,8 +156,9 @@ public class Lumberjack {
 									rc.broadcast(2, 0);
 								}
 								d = new Direction(x - myLocation.x, y - myLocation.y);
-							}
-							Global.tryMove(d);
+
+							} else
+								Global.tryMove(d);
 
 						}
 					}
