@@ -13,7 +13,8 @@ public strictfp class RobotPlayer {
 	static MapLocation myLocation;
 
 	public static void run(RobotController rc) throws GameActionException {
-
+		
+		FastMath.initRand(rc);
 		MapLocation dist = rc.getInitialArchonLocations(rc.getTeam().opponent())[0];
 		// float range = rc.getType().sensorRadius;
 

@@ -14,13 +14,17 @@ public class Bug {
 	public static MapLocation here;
 	public static RobotController rc;
 	private static Direction lastDir = null;
+	private static boolean isRobot = false;
 
-	static boolean tryMove(RobotController rc, Direction dir) throws GameActionException {
-		return tryMove(rc, dir, 10, 4);
+	static Direction randomDirection() {
+		return new Direction(FastMath.rand256() * 0.0245436926f);
 	}
 
-	static boolean tryMove(RobotController rc, Direction dir, float degreeOffset, int checksPerSide)
-			throws GameActionException {
+	static boolean tryMove(Direction dir) throws GameActionException {
+		return tryMove(dir, 10, 4);
+	}
+
+	static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
 
 		// First, try intended direction
 		if (rc.canMove(dir)) {
@@ -55,26 +59,48 @@ public class Bug {
 			lastDir = here.directionTo(theDest);
 			dest = theDest;
 			tracing = false;
+			isRobot = false;
 		}
 
+		Direction dir = here.directionTo(dest);
+
 		if (!tracing) {
-			rc.setIndicatorDot(here.add(here.directionTo(dest)), 128, 0, 0);
-			if (tryMove(rc, here.directionTo(dest))) {
+			rc.setIndicatorDot(here.add(dir), 128, 0, 0);
+			if (tryMove(dir)) {
 				lastDir = here.directionTo(theDest);
 				return;
+			} else if (rc.senseNearbyRobots(rc.getType().strideRadius + rc.getType().bodyRadius).length > 0) {
+				isRobot = true;
+				rc.setIndicatorDot(here.add(dir), 128, 0, 128);
 			} else {
 				startTracing();
 			}
 		} else if (here.distanceSquaredTo(dest) < closestDistWhileBugging) {
-			rc.setIndicatorDot(here.add(here.directionTo(dest)), 0, 128, 0);
-			if (tryMove(rc, here.directionTo(dest))) {
+			rc.setIndicatorDot(here.add(dir), 0, 128, 0);
+			if (tryMove(dir)) {
 				lastDir = here.directionTo(theDest);
 				tracing = false;
 				return;
 			}
 
 		}
-		traceMove();
+		if (isRobot) {
+			dir = randomDirection();
+			rc.setIndicatorLine(here, here.add(dir), 128, 128, 128);
+			for (int i = 0; i < 6; i++) {
+				dir = dir.rotateLeftDegrees(90);
+				rc.setIndicatorLine(here, here.add(dir), 0, 0, 128);
+				if (tryMove(dir)) {
+					lastDir = dir;
+					isRobot = false;
+					tracing = false;
+					return;
+				}
+			}
+
+		} else {
+			traceMove();
+		}
 	}
 
 	static void startTracing() {
@@ -88,23 +114,26 @@ public class Bug {
 		rc.setIndicatorDot(lastWall, 0, 128, 128);
 		rc.setIndicatorLine(here, here.add(lastDir), 255, 255, 0);
 		double dif = tryDir.radians - lastDir.radians;
-		if ((dif + 3.14159265358979323846264338)
-				% (2 * 3.14159265358979323846264338) - 3.14159265358979323846264338 < 0) {
-			for (int i = 0; i < 12; i++) {
-				tryDir = tryDir.rotateLeftDegrees(30);
+		if ((dif + 3.14159265358979323846264338) % (2 * 3.14159265358979323846264338)
+				- 3.14159265358979323846264338 < 0) {
+			for (int i = 0; i < 8; i++) {
+				tryDir = tryDir.rotateLeftDegrees(90);
 				rc.setIndicatorLine(here, here.add(tryDir), 0, 0, 128);
-				if (tryMove(rc, tryDir)) {
+				if (tryMove(tryDir)) {
 					lastDir = tryDir;
 					return;
+				} else if (rc.senseNearbyRobots(rc.getType().strideRadius + rc.getType().bodyRadius).length > 0) {
+					isRobot = true;
+					tracing = false;
 				} else {
 					lastWall = here.add(tryDir);
 				}
 			}
 		} else {
-			for (int i = 0; i < 12; i++) {
-				tryDir = tryDir.rotateRightDegrees(30);
+			for (int i = 0; i < 8; i++) {
+				tryDir = tryDir.rotateRightDegrees(90);
 				rc.setIndicatorLine(here, here.add(tryDir), 0, 0, 128);
-				if (tryMove(rc, tryDir)) {
+				if (tryMove(tryDir)) {
 					lastDir = tryDir;
 					return;
 				} else {
