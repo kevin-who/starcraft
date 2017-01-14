@@ -2,7 +2,6 @@ package marines;
 
 import battlecode.common.Clock;
 import battlecode.common.Direction;
-import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -45,39 +44,25 @@ public class Soldier {
 					myLoc = rc.getLocation();
 
 					MapLocation enemyLocation = robots[0].getLocation();
-					Direction toEnemy = myLoc.directionTo(enemyLocation);
 
 					rc.broadcast(2, rc.getRoundNum());
 					rc.broadcast(3, (int) enemyLocation.x);
 					rc.broadcast(4, (int) enemyLocation.y);
-					boolean isZerg = robots[0].getType().equals(RobotType.LUMBERJACK);
-					if (!rc.hasMoved()) {
-						if (!isZerg)
-							Global.tryMove(toEnemy);
-						else
-							Global.tryMove(toEnemy.opposite());
-					}
+					Global.goTo(enemyLocation);
+
 					myLoc = rc.getLocation();
-					toEnemy = myLoc.directionTo(enemyLocation);
+					Direction toEnemy = myLoc.directionTo(enemyLocation);
 
 					int d = (int) myLoc.distanceTo(enemyLocation);
-					if (isZerg) {
-						if (d < 2 && rc.canFirePentadShot())
-							rc.firePentadShot(toEnemy);
-						else if (rc.canFireTriadShot()) {
-							rc.fireTriadShot(toEnemy);
-						} else if (rc.canFireSingleShot()) {
-							rc.fireSingleShot(toEnemy);
-						}
-					} else {
-						if (d < 2 && rc.canFirePentadShot())
-							rc.firePentadShot(toEnemy);
-						else if (d < 4 && rc.canFireTriadShot()) {
-							rc.fireTriadShot(toEnemy);
-						} else if (rc.canFireSingleShot()) {
-							rc.fireSingleShot(toEnemy);
-						}
+
+					if (d < 2 && rc.canFirePentadShot())
+						rc.firePentadShot(toEnemy);
+					else if (d < 4 && rc.canFireTriadShot()) {
+						rc.fireTriadShot(toEnemy);
+					} else if (rc.canFireSingleShot()) {
+						rc.fireSingleShot(toEnemy);
 					}
+
 				} else {
 
 					if (!rc.hasMoved()) {

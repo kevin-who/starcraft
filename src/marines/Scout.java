@@ -33,6 +33,8 @@ public class Scout {
 
 		// The code you want your robot to perform every round should be in this
 		// loop
+		Direction dir = myLocation.directionTo(enemyBase);
+
 		while (true) {
 
 			// Try/catch blocks stop unhandled exceptions, which cause your
@@ -45,8 +47,6 @@ public class Scout {
 					Global.dodge();
 				}
 				move = true;
-
-				Direction dir = myLocation.directionTo(enemyBase);
 
 				RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
 
@@ -91,20 +91,19 @@ public class Scout {
 						rc.broadcast(4, (int) enemyLocation.y);
 
 						if (!rc.hasMoved()) {
-							Global.tryMove(toEnemy.opposite());
+							Global.tryMove(toEnemy.opposite().rotateLeftDegrees(45));
 							myLocation = rc.getLocation();
 							toEnemy = myLocation.directionTo(enemyLocation);
 						}
 						if (rc.canFireSingleShot()) {
 							rc.fireSingleShot(toEnemy);
 						}
-						move = false;
 					}
 				}
 				if (!rc.hasMoved() && move) {
-					if (toBase) {
-						Global.tryMove(dir);
-					} else if (!Global.tryMove(dir, 0, 0)) {
+					if (toBase)
+						Global.tryMove(dir, 0, 0);
+					else if (!Global.tryMove(dir, 0, 0)) {
 						dir = Global.rndDir();
 					}
 				}
