@@ -12,7 +12,7 @@ import battlecode.common.TreeInfo;
 
 public class Lumberjack {
 
-	MapLocation myLocation;
+	MapLocation myLoc;
 	RobotController rc;
 
 	void phase1() {
@@ -22,11 +22,12 @@ public class Lumberjack {
 		if (trees.length > 0) {
 			while (true) {
 				try {
+					myLoc = rc.getLocation();
+					Global.loc = myLoc;
 					move = true;
 					int done = 0;
 					int closest = 0;
 					float min = 10000000;
-					myLocation = rc.getLocation();
 					for (int x = 0; x < trees.length; x++) {
 						MapLocation this_tree = trees[x].location;
 						if (rc.canSenseLocation(this_tree)) {
@@ -42,7 +43,7 @@ public class Lumberjack {
 									break;
 								}
 
-								float distance_to = myLocation.distanceTo(this_tree);
+								float distance_to = myLoc.distanceTo(this_tree);
 								if (min > distance_to) {
 									closest = x;
 									min = distance_to;
@@ -50,7 +51,7 @@ public class Lumberjack {
 
 							}
 						} else {
-							float distance_to = myLocation.distanceTo(this_tree);
+							float distance_to = myLoc.distanceTo(this_tree);
 							if (min > distance_to) {
 								closest = x;
 								min = distance_to;
@@ -59,7 +60,7 @@ public class Lumberjack {
 					}
 					boolean far = min > (RobotType.LUMBERJACK.bodyRadius + trees[closest].radius);
 					if (!rc.hasMoved() && move && far && !trees[closest].getTeam().equals(rc.getTeam())) {
-						Global.tryMove(myLocation.directionTo(trees[closest].location), 45, 3);
+						Global.tryMove(myLoc.directionTo(trees[closest].location), 45, 3);
 						rc.setIndicatorDot(trees[closest].location, 0, 0, 128);
 					} else if (!far) {
 						move = false;
@@ -88,16 +89,15 @@ public class Lumberjack {
 			// Try/catch blocks stop unhandled exceptions, which cause your
 			// robot to explode
 			try {
+				myLoc = rc.getLocation();
+				Global.loc = myLoc;
+				move = true;
+				if (!rc.hasMoved())
+					Global.dodge();
+				
 				if ((int) (rc.getTeamBullets() / 10) + rc.getTeamVictoryPoints() >= 1000) {
 					rc.donate(rc.getTeamBullets());
 				}
-				move = true;
-				// See if there are any enemy robots within striking range
-				// (distance 1 from lumberjack's radius)
-
-				myLocation = rc.getLocation();
-				if (!rc.hasMoved())
-					Global.dodge(myLocation);
 
 				RobotInfo[] robots = rc.senseNearbyRobots(
 						RobotType.LUMBERJACK.bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS, enemy);
@@ -106,15 +106,15 @@ public class Lumberjack {
 					// Use strike() to hit all nearby robots!
 					rc.strike();
 					rc.broadcast(2, rc.getRoundNum());
-					rc.broadcast(3, (int) myLocation.x);
-					rc.broadcast(4, (int) myLocation.y);
+					rc.broadcast(3, (int) myLoc.x);
+					rc.broadcast(4, (int) myLoc.y);
 				} else {
 					robots = rc.senseNearbyRobots(-1, enemy);
 
 					if (robots.length > 0) {
 
 						MapLocation enemyLocation = robots[0].getLocation();
-						Direction toEnemy = myLocation.directionTo(enemyLocation);
+						Direction toEnemy = myLoc.directionTo(enemyLocation);
 						rc.broadcast(2, rc.getRoundNum());
 						rc.broadcast(3, (int) enemyLocation.x);
 						rc.broadcast(4, (int) enemyLocation.y);
@@ -129,7 +129,7 @@ public class Lumberjack {
 							for (int x = 0; x < trees.length; x++) {
 								TreeInfo this_tree = trees[x];
 								if (!this_tree.getTeam().equals(rc.getTeam())) {
-									float distance_to = myLocation.distanceSquaredTo(this_tree.location);
+									float distance_to = myLoc.distanceSquaredTo(this_tree.location);
 									if (mindist > distance_to) {
 										closest_index = x;
 										mindist = distance_to;
@@ -142,7 +142,7 @@ public class Lumberjack {
 							}
 							boolean far = mindist > (RobotType.LUMBERJACK.bodyRadius + trees[closest_index].radius);
 							if (!rc.hasMoved() && move && far && !trees[closest_index].getTeam().equals(rc.getTeam())) {
-								Global.tryMove(myLocation.directionTo(trees[closest_index].location));
+								Global.tryMove(myLoc.directionTo(trees[closest_index].location));
 							} else if (!far) {
 								move = false;
 							}
@@ -153,10 +153,10 @@ public class Lumberjack {
 							if (rc.readBroadcast(2) != 0) {
 								int x = rc.readBroadcast(3);
 								int y = rc.readBroadcast(4);
-								if (myLocation.isWithinDistance(new MapLocation(x, y), 5)) {
+								if (myLoc.isWithinDistance(new MapLocation(x, y), 5)) {
 									rc.broadcast(2, 0);
 								}
-								d = new Direction(x - myLocation.x, y - myLocation.y);
+								d = new Direction(x - myLoc.x, y - myLoc.y);
 							}
 							Global.tryMove(d);
 

@@ -6,6 +6,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
+import marines.Bug;
 
 public strictfp class RobotPlayer {
 	static RobotController rc;
@@ -25,7 +26,7 @@ public strictfp class RobotPlayer {
 
 				try {
 					myLocation = rc.getLocation();
-					Bug.here = myLocation;
+					Bug.loc = myLocation;
 
 					Bug.goTo(dist);
 					if (myLocation.isWithinDistance(dist, 1)) {

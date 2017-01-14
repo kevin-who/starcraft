@@ -12,7 +12,7 @@ import battlecode.common.TreeInfo;
 
 public class Soldier {
 
-	MapLocation myLocation;
+	MapLocation myLoc;
 	RobotController rc;
 
 	void run() {
@@ -31,8 +31,9 @@ public class Soldier {
 
 					rc.donate(rc.getTeamBullets());
 				}
-				myLocation = rc.getLocation();
-				Global.dodge(myLocation);
+				myLoc = rc.getLocation();
+				Global.loc = myLoc;
+				Global.dodge();
 
 				// See if there are any nearby enemy robots
 				RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
@@ -41,10 +42,10 @@ public class Soldier {
 				if (robots.length > 0) {
 					// And we have enough bullets, and haven't attacked yet this
 					// turn...
-					myLocation = rc.getLocation();
+					myLoc = rc.getLocation();
 
 					MapLocation enemyLocation = robots[0].getLocation();
-					Direction toEnemy = myLocation.directionTo(enemyLocation);
+					Direction toEnemy = myLoc.directionTo(enemyLocation);
 
 					rc.broadcast(2, rc.getRoundNum());
 					rc.broadcast(3, (int) enemyLocation.x);
@@ -56,10 +57,10 @@ public class Soldier {
 						else
 							Global.tryMove(toEnemy.opposite());
 					}
-					myLocation = rc.getLocation();
-					toEnemy = myLocation.directionTo(enemyLocation);
+					myLoc = rc.getLocation();
+					toEnemy = myLoc.directionTo(enemyLocation);
 
-					int d = (int) myLocation.distanceTo(enemyLocation);
+					int d = (int) myLoc.distanceTo(enemyLocation);
 					if (isZerg) {
 						if (d < 2 && rc.canFirePentadShot())
 							rc.firePentadShot(toEnemy);
@@ -84,10 +85,10 @@ public class Soldier {
 						if (rc.readBroadcast(2) != 0) {
 							int x = rc.readBroadcast(3);
 							int y = rc.readBroadcast(4);
-							if (myLocation.isWithinDistance(new MapLocation(x, y), 5)) {
+							if (myLoc.isWithinDistance(new MapLocation(x, y), 5)) {
 								rc.broadcast(2, 0);
 							}
-							d = new Direction(x - myLocation.x, y - myLocation.y);
+							d = new Direction(x - myLoc.x, y - myLoc.y);
 						}
 					} catch (GameActionException e) {
 
@@ -95,7 +96,7 @@ public class Soldier {
 					if (!rc.hasMoved())
 						Global.tryMove(d);
 					if (!rc.hasAttacked()) {
-						myLocation = rc.getLocation();
+						myLoc = rc.getLocation();
 
 						TreeInfo[] trees = rc.senseNearbyTrees(3);
 
@@ -104,7 +105,7 @@ public class Soldier {
 								TreeInfo this_tree = trees[x];
 								if (!this_tree.getTeam().equals(rc.getTeam()) && !rc.hasAttacked()
 										&& rc.canFireSingleShot()) {
-									rc.fireSingleShot(myLocation.directionTo(this_tree.location));
+									rc.fireSingleShot(myLoc.directionTo(this_tree.location));
 									break;
 
 								}

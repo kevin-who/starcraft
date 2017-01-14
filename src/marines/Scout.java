@@ -38,12 +38,13 @@ public class Scout {
 			// Try/catch blocks stop unhandled exceptions, which cause your
 			// robot to explode
 			try {
+				myLocation = rc.getLocation();
+				Global.loc = myLocation;
+
 				if (!rc.hasMoved()) {
-					Global.dodge(myLocation);
+					Global.dodge();
 				}
 				move = true;
-
-				myLocation = rc.getLocation();
 
 				Direction dir = myLocation.directionTo(enemyBase);
 
@@ -71,10 +72,9 @@ public class Scout {
 						enemyGardener = robots[closest];
 						MapLocation gardenerLocation = enemyGardener.getLocation();
 						Direction toGardener = myLocation.directionTo(gardenerLocation);
+						if (!rc.hasMoved())
+							Global.goTo(gardenerLocation);
 
-						if (myLocation.distanceTo(gardenerLocation) > 5 && !rc.hasMoved()) {
-							Global.tryMove(toGardener);
-						}
 						myLocation = rc.getLocation();
 						toGardener = myLocation.directionTo(gardenerLocation);
 						if (rc.canFireSingleShot()) {
@@ -91,16 +91,14 @@ public class Scout {
 						rc.broadcast(4, (int) enemyLocation.y);
 
 						if (!rc.hasMoved()) {
-							if (myLocation.distanceTo(enemyLocation) > 9)
-								Global.tryMove(toEnemy);
-							else
-								Global.tryMove(toEnemy.opposite());
+							Global.tryMove(toEnemy.opposite());
 							myLocation = rc.getLocation();
 							toEnemy = myLocation.directionTo(enemyLocation);
 						}
 						if (rc.canFireSingleShot()) {
 							rc.fireSingleShot(toEnemy);
 						}
+						move = false;
 					}
 				}
 				if (!rc.hasMoved() && move) {

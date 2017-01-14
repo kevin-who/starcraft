@@ -10,7 +10,7 @@ import battlecode.common.TreeInfo;
 
 public class Tank {
 
-	MapLocation myLocation;
+	MapLocation myLoc;
 	RobotController rc;
 
 	void run() {
@@ -28,8 +28,9 @@ public class Tank {
 
 					rc.donate(rc.getTeamBullets());
 				}
-				myLocation = rc.getLocation();
-				Global.dodge(myLocation);
+				myLoc = rc.getLocation();
+				Global.loc = myLoc;
+				Global.dodge();
 
 				// See if there are any nearby enemy robots
 				RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
@@ -39,14 +40,14 @@ public class Tank {
 					// And we have enough bullets, and haven't attacked yet this
 					// turn...
 					MapLocation enemyLocation = robots[0].getLocation();
-					Direction toEnemy = myLocation.directionTo(enemyLocation);
+					Direction toEnemy = myLoc.directionTo(enemyLocation);
 
 					rc.broadcast(2, rc.getRoundNum());
 					rc.broadcast(3, (int) enemyLocation.x);
 					rc.broadcast(4, (int) enemyLocation.y);
 
 					if (!rc.hasMoved()) {
-						if (myLocation.distanceTo(enemyLocation) > 6)
+						if (myLoc.distanceTo(enemyLocation) > 6)
 							Global.tryMove(toEnemy);
 						else
 							Global.tryMove(toEnemy.opposite());
@@ -64,14 +65,14 @@ public class Tank {
 					if (rc.readBroadcast(2) != 0) {
 						int x = rc.readBroadcast(3);
 						int y = rc.readBroadcast(4);
-						if (myLocation.isWithinDistance(new MapLocation(x, y), 5)) {
+						if (myLoc.isWithinDistance(new MapLocation(x, y), 5)) {
 							rc.broadcast(2, 0);
 						}
-						d = new Direction(x - myLocation.x, y - myLocation.y);
+						d = new Direction(x - myLoc.x, y - myLoc.y);
 					}
 
 					if (!rc.hasMoved())
-						Global.tryMove( d);
+						Global.tryMove(d);
 
 					TreeInfo[] trees = rc.senseNearbyTrees(3);
 
@@ -80,7 +81,7 @@ public class Tank {
 							TreeInfo this_tree = trees[x];
 							if (!this_tree.getTeam().equals(rc.getTeam()) && !rc.hasAttacked()
 									&& rc.canFireSingleShot()) {
-								rc.fireSingleShot(myLocation.directionTo(this_tree.location));
+								rc.fireSingleShot(myLoc.directionTo(this_tree.location));
 								break;
 
 							}

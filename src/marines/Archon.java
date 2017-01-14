@@ -9,20 +9,20 @@ import battlecode.common.Team;
 
 public class Archon {
 
-	MapLocation myLocation;
+	MapLocation myLoc;
 	RobotController rc;
 
 	void run() {
 		System.out.println("I'm an archon!");
 		Team team = rc.getTeam();
 		Team enemy = team.opponent();
-		myLocation = rc.getLocation();
+		myLoc = rc.getLocation();
 		MapLocation[] enemies = rc.getInitialArchonLocations(enemy);
 		int number = enemies.length;
 		int closest = 0;
 		float min = 10000000;
 		for (int e = 0; e < enemies.length; e++) {
-			float temp = myLocation.distanceTo(enemies[e]);
+			float temp = myLoc.distanceTo(enemies[e]);
 			if (temp < min) {
 				closest = e;
 				min = temp;
@@ -37,8 +37,9 @@ public class Archon {
 			// Try/catch blocks stop unhandled exceptions, which cause your
 			// robot to explode
 			try {
-				myLocation = rc.getLocation();
-				Global.dodge(myLocation);
+				myLoc = rc.getLocation();
+				Global.loc = myLoc;
+				Global.dodge();
 				int num = rc.getRoundNum();
 
 				RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
@@ -56,7 +57,7 @@ public class Archon {
 				if (!rc.hasMoved())
 					Global.tryMove(dir, 0, 0);
 
-				dir = myLocation.directionTo(enemyLocation);
+				dir = myLoc.directionTo(enemyLocation);
 				if (rc.getRobotCount() < 2 * number && rc.canHireGardener(dir)) {
 					rc.hireGardener(dir);
 				} else if (rc.canHireGardener(dir) && rc.getTreeCount() > 1 && FastMath.rand256() < 30) {

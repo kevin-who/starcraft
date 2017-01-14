@@ -11,7 +11,7 @@ import battlecode.common.TreeInfo;
 
 public class Gardener {
 
-	MapLocation myLocation;
+	MapLocation myLoc;
 	RobotController rc;
 	MapLocation enemyLocation;
 	boolean scout = true;
@@ -38,7 +38,7 @@ public class Gardener {
 			// Try/catch blocks stop unhandled exceptions, which cause your
 			// robot to explode
 			try {
-				myLocation = rc.getLocation();
+				myLoc = rc.getLocation();
 
 				if (scout && rc.getRoundNum() < 100 && rc.getTeamBullets() > RobotType.SCOUT.bulletCost) {
 					dir = Global.rndDir();
@@ -52,15 +52,15 @@ public class Gardener {
 					scout = false;
 				}
 
-				if (count < 30 && start.distanceTo(myLocation) < 7) {
-					Global.tryMove(myLocation.directionTo(enemyLocation), 30, 6);
+				if (count < 30 && start.distanceTo(myLoc) < 7) {
+					Global.tryMove(myLoc.directionTo(enemyLocation), 30, 6);
 					count++;
 				} else {
-					if (rc.isCircleOccupiedExceptByThisRobot(myLocation, 5) && rc.senseNearbyTrees(5).length < 1) {
+					if (rc.isCircleOccupiedExceptByThisRobot(myLoc, 5) && rc.senseNearbyTrees(3.5f).length < 1) {
 						break;
 					}
 
-					if (rc.senseNearbyRobots(5).length < 1 && rc.senseNearbyTrees(5, rc.getTeam()).length < 1) {
+					if (rc.senseNearbyRobots(5).length < 1 && rc.senseNearbyTrees(3.5f, rc.getTeam()).length < 1) {
 						dir = Global.rndDir();
 						if (rc.getTeamBullets() > RobotType.LUMBERJACK.bulletCost) {
 							for (int x = 0; x < 18; x++) {
@@ -106,8 +106,8 @@ public class Gardener {
 	void phase2() {
 
 		Team enemy = rc.getTeam().opponent();
-		Direction dir = myLocation.directionTo(enemyLocation).rotateLeftDegrees(-30);
-		myLocation = rc.getLocation();
+		Direction dir = myLoc.directionTo(enemyLocation).rotateLeftDegrees(-30);
+		myLoc = rc.getLocation();
 		TreeInfo[] ti;
 
 		while (true) {
@@ -128,7 +128,7 @@ public class Gardener {
 
 					rc.donate(rc.getTeamBullets());
 				}
-				myLocation = rc.getLocation();
+				myLoc = rc.getLocation();
 
 				RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
 
