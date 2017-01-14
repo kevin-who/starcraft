@@ -1,9 +1,5 @@
 package mapping;
 
-import static mapping.Global.dodge;
-import static mapping.Global.randomDirection;
-import static mapping.Global.tryMove;
-
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -15,10 +11,10 @@ import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
 public class Soldier {
-	
+
 	MapLocation myLocation;
 	RobotController rc;
-	
+
 	void run() {
 		System.out.println("I'm a soldier!");
 		Team enemy = rc.getTeam().opponent();
@@ -36,7 +32,7 @@ public class Soldier {
 					rc.donate(rc.getTeamBullets());
 				}
 				myLocation = rc.getLocation();
-				dodge(rc, myLocation);
+				Global.dodge(myLocation);
 
 				// See if there are any nearby enemy robots
 				RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
@@ -56,9 +52,9 @@ public class Soldier {
 					boolean isZerg = robots[0].getType().equals(RobotType.LUMBERJACK);
 					if (!rc.hasMoved()) {
 						if (!isZerg)
-							tryMove(rc, toEnemy);
+							Global.tryMove(toEnemy);
 						else
-							tryMove(rc, toEnemy.opposite());
+							Global.tryMove(toEnemy.opposite());
 					}
 					myLocation = rc.getLocation();
 					toEnemy = myLocation.directionTo(enemyLocation);
@@ -83,7 +79,7 @@ public class Soldier {
 					}
 				} else {
 
-					Direction d = randomDirection();
+					Direction d = Global.rndDir();
 					try {
 						if (rc.readBroadcast(2) != 0) {
 							int x = rc.readBroadcast(3);
@@ -97,7 +93,7 @@ public class Soldier {
 
 					}
 					if (!rc.hasMoved())
-						tryMove(rc, d);
+						Global.tryMove(d);
 					if (!rc.hasAttacked()) {
 						myLocation = rc.getLocation();
 
@@ -130,7 +126,8 @@ public class Soldier {
 
 	public Soldier(RobotController rc) {
 		this.rc = rc;
-        run();
+		Global.rc = rc;
+		run();
 	}
 
 }

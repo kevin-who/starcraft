@@ -1,9 +1,5 @@
 package marines;
 
-import static marines.Global.dodge;
-import static marines.Global.randomDirection;
-import static marines.Global.tryMove;
-
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
@@ -42,7 +38,7 @@ public class Archon {
 			// robot to explode
 			try {
 				myLocation = rc.getLocation();
-				dodge(rc, myLocation);
+				Global.dodge(myLocation);
 				int num = rc.getRoundNum();
 
 				RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
@@ -55,10 +51,10 @@ public class Archon {
 
 				}
 				// Generate a random direction
-				Direction dir = randomDirection();
+				Direction dir = Global.rndDir();
 
 				if (!rc.hasMoved())
-					tryMove(rc, dir, 0, 0);
+					Global.tryMove(dir, 0, 0);
 
 				dir = myLocation.directionTo(enemyLocation);
 				if (rc.getRobotCount() < 2 * number && rc.canHireGardener(dir)) {
@@ -71,7 +67,7 @@ public class Archon {
 					if (rc.getTeamBullets() > 60)
 						rc.donate(20);
 				}
-				
+
 				float ammo = rc.getTeamBullets();
 				if ((int) (ammo / 10) + rc.getTeamVictoryPoints() >= 1000) {
 					rc.donate(rc.getTeamBullets());
@@ -91,6 +87,7 @@ public class Archon {
 
 	public Archon(RobotController rc) {
 		this.rc = rc;
+		Global.rc = rc;
 		run();
 	}
 

@@ -1,10 +1,11 @@
 package mapping;
 
-import static mapping.Global.dodge;
-import static mapping.Global.randomDirection;
-import static mapping.Global.tryMove;
-
-import battlecode.common.*;
+import battlecode.common.Clock;
+import battlecode.common.Direction;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
+import battlecode.common.Team;
 
 public class Scout {
 	
@@ -14,7 +15,7 @@ public class Scout {
 	void run() {
 		System.out.println("I'm an scout!");
 		Team enemy = rc.getTeam().opponent();
-		Direction d = randomDirection();
+		Direction d = Global.rndDir();
 
 		// The code you want your robot to perform every round should be in this
 		// loop
@@ -29,7 +30,7 @@ public class Scout {
 					rc.donate(rc.getTeamBullets());
 				}
 				myLocation = rc.getLocation();
-				dodge(rc, myLocation);
+				Global.dodge( myLocation);
 				// See if there are any nearby enemy robots
 				RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
 
@@ -46,9 +47,9 @@ public class Scout {
 
 					if (!rc.hasMoved()) {
 						if (myLocation.distanceTo(enemyLocation) > 9)
-							tryMove(rc, toEnemy);
+							Global.tryMove(toEnemy);
 						else
-							tryMove(rc, toEnemy.opposite());
+							Global.tryMove(toEnemy.opposite());
 					}
 					if (rc.canFireSingleShot()) {
 						rc.fireSingleShot(toEnemy);
@@ -56,8 +57,8 @@ public class Scout {
 				} else {
 
 					if (!rc.hasMoved())
-						if (!tryMove(rc, d, 0, 0)) {
-							d = randomDirection();
+						if (!Global.tryMove(d, 0, 0)) {
+							d = Global.rndDir();
 						}
 
 				}
@@ -75,6 +76,7 @@ public class Scout {
 
 	public Scout(RobotController rc) {
 		this.rc = rc;
+		Global.rc = rc;
         run();
 	}
 

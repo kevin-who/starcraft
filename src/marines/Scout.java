@@ -1,9 +1,5 @@
 package marines;
 
-import static marines.Global.dodge;
-import static marines.Global.randomDirection;
-import static marines.Global.tryMove;
-
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
@@ -43,7 +39,7 @@ public class Scout {
 			// robot to explode
 			try {
 				if (!rc.hasMoved()) {
-					dodge(rc, myLocation);
+					Global.dodge(myLocation);
 				}
 				move = true;
 
@@ -54,20 +50,18 @@ public class Scout {
 				RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
 
 				if (robots.length > 0) {
+					closest = 0;
+					min = 10000000;
 					boolean target = false;
 					RobotInfo enemyGardener;
 					for (int x = 0; x < robots.length; x++) {
-						RobotInfo this_bot = robots[x];
-						if (this_bot.getType().equals(RobotType.GARDENER)) {
+						RobotInfo bot = robots[x];
+						if (bot.getType().equals(RobotType.GARDENER)) {
 
-							closest = 0;
-							min = 10000000;
-							for (int e = 0; e < enemies.length; e++) {
-								float temp = myLocation.distanceTo(enemies[e]);
-								if (temp < min) {
-									closest = e;
-									min = temp;
-								}
+							float temp = myLocation.distanceTo(bot.location);
+							if (temp < min) {
+								closest = x;
+								min = temp;
 							}
 							target = true;
 						}
@@ -79,7 +73,7 @@ public class Scout {
 						Direction toGardener = myLocation.directionTo(gardenerLocation);
 
 						if (myLocation.distanceTo(gardenerLocation) > 5 && !rc.hasMoved()) {
-							tryMove(rc, toGardener);
+							Global.tryMove(toGardener);
 						}
 						myLocation = rc.getLocation();
 						toGardener = myLocation.directionTo(gardenerLocation);
@@ -98,9 +92,9 @@ public class Scout {
 
 						if (!rc.hasMoved()) {
 							if (myLocation.distanceTo(enemyLocation) > 9)
-								tryMove(rc, toEnemy);
+								Global.tryMove(toEnemy);
 							else
-								tryMove(rc, toEnemy.opposite());
+								Global.tryMove(toEnemy.opposite());
 							myLocation = rc.getLocation();
 							toEnemy = myLocation.directionTo(enemyLocation);
 						}
@@ -111,9 +105,9 @@ public class Scout {
 				}
 				if (!rc.hasMoved() && move) {
 					if (toBase) {
-						tryMove(rc, dir);
-					} else if (!tryMove(rc, dir, 0, 0)) {
-						dir = randomDirection();
+						Global.tryMove(dir);
+					} else if (!Global.tryMove(dir, 0, 0)) {
+						dir = Global.rndDir();
 					}
 				}
 
@@ -129,6 +123,7 @@ public class Scout {
 
 	public Scout(RobotController rc) {
 		this.rc = rc;
+		Global.rc = rc;
 		run();
 	}
 

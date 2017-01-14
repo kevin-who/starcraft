@@ -1,9 +1,5 @@
 package mapping;
 
-import static mapping.Global.dodge;
-import static mapping.Global.randomDirection;
-import static mapping.Global.tryMove;
-
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
@@ -33,7 +29,7 @@ public class Tank {
 					rc.donate(rc.getTeamBullets());
 				}
 				myLocation = rc.getLocation();
-				dodge(rc, myLocation);
+				Global.dodge( myLocation);
 
 				// See if there are any nearby enemy robots
 				RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
@@ -51,9 +47,9 @@ public class Tank {
 
 					if (!rc.hasMoved()) {
 						if (myLocation.distanceTo(enemyLocation) > 6)
-							tryMove(rc, toEnemy);
+							Global.tryMove(toEnemy);
 						else
-							tryMove(rc, toEnemy.opposite());
+							Global.tryMove(toEnemy.opposite());
 					}
 
 					if (robots.length > 4 && rc.canFirePentadShot()) {
@@ -64,7 +60,7 @@ public class Tank {
 						rc.fireSingleShot(toEnemy);
 				} else {
 
-					Direction d = randomDirection();
+					Direction d = Global.rndDir();
 					if (rc.readBroadcast(2) != 0) {
 						int x = rc.readBroadcast(3);
 						int y = rc.readBroadcast(4);
@@ -75,7 +71,7 @@ public class Tank {
 					}
 
 					if (!rc.hasMoved())
-						tryMove(rc, d);
+						Global.tryMove(d);
 
 					TreeInfo[] trees = rc.senseNearbyTrees(3);
 
@@ -104,6 +100,7 @@ public class Tank {
 
 	public Tank(RobotController rc) {
 		this.rc = rc;
+		Global.rc = rc;
 		run();
 	}
 

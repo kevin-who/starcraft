@@ -1,9 +1,5 @@
 package marines;
 
-import static marines.Global.dodge;
-import static marines.Global.randomDirection;
-import static marines.Global.tryMove;
-
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameConstants;
@@ -63,7 +59,7 @@ public class Lumberjack {
 					}
 					boolean far = min > (RobotType.LUMBERJACK.bodyRadius + trees[closest].radius);
 					if (!rc.hasMoved() && move && far && !trees[closest].getTeam().equals(rc.getTeam())) {
-						tryMove(rc, myLocation.directionTo(trees[closest].location), 45, 3);
+						Global.tryMove(myLocation.directionTo(trees[closest].location), 45, 3);
 						rc.setIndicatorDot(trees[closest].location, 0, 0, 128);
 					} else if (!far) {
 						move = false;
@@ -101,7 +97,7 @@ public class Lumberjack {
 
 				myLocation = rc.getLocation();
 				if (!rc.hasMoved())
-					dodge(rc, myLocation);
+					Global.dodge(myLocation);
 
 				RobotInfo[] robots = rc.senseNearbyRobots(
 						RobotType.LUMBERJACK.bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS, enemy);
@@ -123,7 +119,7 @@ public class Lumberjack {
 						rc.broadcast(3, (int) enemyLocation.x);
 						rc.broadcast(4, (int) enemyLocation.y);
 						if (!rc.hasMoved())
-							tryMove(rc, toEnemy);
+							Global.tryMove(toEnemy);
 					} else {
 						trees = rc.senseNearbyTrees(-1);
 
@@ -146,14 +142,14 @@ public class Lumberjack {
 							}
 							boolean far = mindist > (RobotType.LUMBERJACK.bodyRadius + trees[closest_index].radius);
 							if (!rc.hasMoved() && move && far && !trees[closest_index].getTeam().equals(rc.getTeam())) {
-								tryMove(rc, myLocation.directionTo(trees[closest_index].location));
+								Global.tryMove(myLocation.directionTo(trees[closest_index].location));
 							} else if (!far) {
 								move = false;
 							}
 						}
 						if (!rc.hasMoved() && move) {
 
-							Direction d = randomDirection();
+							Direction d = Global.rndDir();
 							if (rc.readBroadcast(2) != 0) {
 								int x = rc.readBroadcast(3);
 								int y = rc.readBroadcast(4);
@@ -162,7 +158,7 @@ public class Lumberjack {
 								}
 								d = new Direction(x - myLocation.x, y - myLocation.y);
 							}
-							tryMove(rc, d);
+							Global.tryMove(d);
 
 						}
 					}
@@ -185,6 +181,7 @@ public class Lumberjack {
 
 	public Lumberjack(RobotController rc) {
 		this.rc = rc;
+		Global.rc = rc;
 		run();
 	}
 

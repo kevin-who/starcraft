@@ -1,8 +1,5 @@
 package marines;
 
-import static marines.Global.randomDirection;
-import static marines.Global.tryMove;
-
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.MapLocation;
@@ -21,7 +18,7 @@ public class Gardener {
 
 	void phase1() {
 		Team enemy = rc.getTeam().opponent();
-		Direction dir = randomDirection();
+		Direction dir = Global.rndDir();
 		MapLocation start = rc.getLocation();
 		MapLocation[] enemies = rc.getInitialArchonLocations(enemy);
 		int closest = 0;
@@ -35,7 +32,6 @@ public class Gardener {
 		}
 
 		enemyLocation = rc.getInitialArchonLocations(enemy)[closest];
-		
 
 		int count = 0;
 		while (true) {
@@ -45,7 +41,7 @@ public class Gardener {
 				myLocation = rc.getLocation();
 
 				if (scout && rc.getRoundNum() < 100 && rc.getTeamBullets() > RobotType.SCOUT.bulletCost) {
-					dir = randomDirection();
+					dir = Global.rndDir();
 					for (int x = 0; x < 18; x++) {
 						dir = dir.rotateLeftDegrees(20);
 						if (rc.canBuildRobot(RobotType.SCOUT, dir)) {
@@ -57,7 +53,7 @@ public class Gardener {
 				}
 
 				if (count < 30 && start.distanceTo(myLocation) < 7) {
-					tryMove(rc, myLocation.directionTo(enemyLocation), 30, 6);
+					Global.tryMove(myLocation.directionTo(enemyLocation), 30, 6);
 					count++;
 				} else {
 					if (rc.isCircleOccupiedExceptByThisRobot(myLocation, 5) && rc.senseNearbyTrees(5).length < 1) {
@@ -65,7 +61,7 @@ public class Gardener {
 					}
 
 					if (rc.senseNearbyRobots(5).length < 1 && rc.senseNearbyTrees(5, rc.getTeam()).length < 1) {
-						dir = randomDirection();
+						dir = Global.rndDir();
 						if (rc.getTeamBullets() > RobotType.LUMBERJACK.bulletCost) {
 							for (int x = 0; x < 18; x++) {
 								dir = dir.rotateLeftDegrees(20);
@@ -79,7 +75,7 @@ public class Gardener {
 								break;
 							}
 						}
-					} else if (!rc.hasMoved() && !tryMove(rc, dir, 20, 10) && rc.senseNearbyRobots(5f).length < 1) {
+					} else if (!rc.hasMoved() && !Global.tryMove(dir, 20, 10) && rc.senseNearbyRobots(5f).length < 1) {
 						if (rc.getTeamBullets() > RobotType.LUMBERJACK.bulletCost) {
 							for (int x = 0; x < 18; x++) {
 								dir = dir.rotateLeftDegrees(20);
@@ -92,7 +88,7 @@ public class Gardener {
 							if (!rc.isBuildReady()) {
 								break;
 							}
-							dir = randomDirection();
+							dir = Global.rndDir();
 
 						}
 					}
@@ -118,7 +114,7 @@ public class Gardener {
 			try {
 
 				if (scout && rc.getRoundNum() < 100 && rc.getTeamBullets() > RobotType.SCOUT.bulletCost) {
-					dir = randomDirection();
+					dir = Global.rndDir();
 					for (int x = 0; x < 18; x++) {
 						dir = dir.rotateLeftDegrees(20);
 						if (rc.canBuildRobot(RobotType.SCOUT, dir)) {
@@ -194,6 +190,7 @@ public class Gardener {
 
 	public Gardener(RobotController rc) {
 		this.rc = rc;
+		Global.rc = rc;
 		run();
 	}
 
