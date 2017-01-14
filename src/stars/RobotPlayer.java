@@ -37,23 +37,23 @@ public strictfp class RobotPlayer {
 				}
 			}
 		} else {
+			while (true) {
 
-		}
-		while (true) {
+				try {
+					myLocation = rc.getLocation();
+					if (rc.getRobotCount() < 2) {
+						rc.buildRobot(RobotType.GARDENER, Direction.getWest());
+					} else {
+						return;
+					}
+					Clock.yield();
 
-			try {
-				myLocation = rc.getLocation();
-				if (rc.getRobotCount() < 2) {
-					rc.buildRobot(RobotType.GARDENER, Direction.getWest());
-				} else {
-					return;
+				} catch (GameActionException e) {
+					e.printStackTrace();
 				}
-				Clock.yield();
-
-			} catch (GameActionException e) {
-				e.printStackTrace();
 			}
 		}
+		
 
 	}
 

@@ -17,6 +17,7 @@ public class Gardener {
 	MapLocation myLocation;
 	RobotController rc;
 	MapLocation enemyLocation;
+	boolean scout = true;
 
 	void phase1() {
 		Team enemy = rc.getTeam().opponent();
@@ -34,6 +35,7 @@ public class Gardener {
 		}
 
 		enemyLocation = rc.getInitialArchonLocations(enemy)[closest];
+		
 
 		int count = 0;
 		while (true) {
@@ -41,6 +43,18 @@ public class Gardener {
 			// robot to explode
 			try {
 				myLocation = rc.getLocation();
+
+				if (scout && rc.getRoundNum() < 100 && rc.getTeamBullets() > RobotType.SCOUT.bulletCost) {
+					dir = randomDirection();
+					for (int x = 0; x < 18; x++) {
+						dir = dir.rotateLeftDegrees(20);
+						if (rc.canBuildRobot(RobotType.SCOUT, dir)) {
+							rc.buildRobot(RobotType.SCOUT, dir);
+						}
+
+					}
+					scout = false;
+				}
 
 				if (count < 30 && start.distanceTo(myLocation) < 7) {
 					tryMove(rc, myLocation.directionTo(enemyLocation), 30, 6);
@@ -102,6 +116,18 @@ public class Gardener {
 
 		while (true) {
 			try {
+
+				if (scout && rc.getRoundNum() < 100 && rc.getTeamBullets() > RobotType.SCOUT.bulletCost) {
+					dir = randomDirection();
+					for (int x = 0; x < 18; x++) {
+						dir = dir.rotateLeftDegrees(20);
+						if (rc.canBuildRobot(RobotType.SCOUT, dir)) {
+							rc.buildRobot(RobotType.SCOUT, dir);
+						}
+
+					}
+				}
+
 				if ((int) (rc.getTeamBullets() / 10) + rc.getTeamVictoryPoints() >= 1000) {
 
 					rc.donate(rc.getTeamBullets());
@@ -141,7 +167,7 @@ public class Gardener {
 				} else {
 					if (rc.canBuildRobot(RobotType.SOLDIER, dir) && FastMath.rand256() < 60) {
 						rc.buildRobot(RobotType.SOLDIER, dir);
-					} 
+					}
 					// else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) &&
 					// FastMath.rand256() < 100) {
 					// rc.buildRobot(RobotType.LUMBERJACK, dir);
