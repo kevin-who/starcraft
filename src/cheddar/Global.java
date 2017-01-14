@@ -3,7 +3,6 @@ package cheddar;
 import battlecode.common.*;
 
 import static cheddar.FastMath.rand256;
-import static cheddar.FastMath.xsin;
 
 /**
  * Created by kevinhu on 1/12/17.
@@ -20,12 +19,11 @@ public strictfp class Global {
             Direction directionToRobot = bulletLocation.directionTo(myLocation);
             float distToRobot = bulletLocation.distanceTo(myLocation);
             float theta = propagationDirection.radiansBetween(directionToRobot);
-
             if ((theta < 0 ? -theta : theta) > 1.57079632679) {
                 continue;
             }
 
-            float perpendicularDist = (float) Math.abs(distToRobot * cheese.FastMath.xsin(theta));
+            float perpendicularDist = (float) Math.abs(distToRobot * Math.sin(theta));
 
             if (perpendicularDist <= rc.getType().bodyRadius) {
                 tryMove(rc,propagationDirection.rotateLeftDegrees(90));
@@ -136,7 +134,7 @@ public strictfp class Global {
         // This corresponds to the smallest radius circle centered at our
         // location that would intersect with the
         // line that is the path of the bullet.
-        float perpendicularDist = (float) Math.abs(distToRobot * xsin(theta)); // soh
+        float perpendicularDist = (float) Math.abs(distToRobot * Math.sin(theta)); // soh
         // cah
         // toa
         // :)

@@ -24,7 +24,7 @@ public strictfp class Global {
                 continue;
             }
 
-            float perpendicularDist = (float) Math.abs(distToRobot * cheese.FastMath.xsin(theta));
+            float perpendicularDist = (float) Math.abs(distToRobot * Math.sin(theta));
 
             if (perpendicularDist <= rc.getType().bodyRadius) {
                 tryMove(rc,propagationDirection.rotateLeftDegrees(90));

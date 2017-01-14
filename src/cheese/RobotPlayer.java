@@ -2,9 +2,7 @@ package cheese;
 
 import battlecode.common.*;
 
-import static cheese.FastMath.initRand;
-import static cheese.FastMath.rand256;
-import static cheese.FastMath.xsin;
+import static cheese.FastMath.*;
 
 public strictfp class RobotPlayer {
 	static RobotController rc;
@@ -66,7 +64,7 @@ public strictfp class RobotPlayer {
 				continue;
 			}
 
-			float perpendicularDist = (float) Math.abs(distToRobot * xsin(theta));
+			float perpendicularDist = (float) Math.abs(distToRobot * Math.sin(theta));
 
 			if (perpendicularDist <= rc.getType().bodyRadius) {
 				tryMove(propagationDirection.rotateLeftDegrees(90));
@@ -78,7 +76,7 @@ public strictfp class RobotPlayer {
 	static void runArchon() throws GameActionException {
 		System.out.println("ARCHON");
 		Team enemy = rc.getTeam().opponent();
-		Direction dir= randomDirection();
+		Direction dir = randomDirection();
 
 		// The code you want your robot to perform every round should be in this
 		// loop
@@ -96,7 +94,7 @@ public strictfp class RobotPlayer {
 				RobotInfo[] robots = rc.senseNearbyRobots(-1, enemy);
 				RobotInfo[] bots = rc.senseNearbyRobots(-1, enemy);
 				for (int x = 0; x < bots.length; x++) {
-					if(bots[x].getType()==RobotType.GARDENER){
+					if (bots[x].getType() == RobotType.GARDENER) {
 						nearby_gardeners++;
 					}
 				}
@@ -106,24 +104,24 @@ public strictfp class RobotPlayer {
 					rc.broadcast(10, rc.getRoundNum());
 					rc.broadcast(11, (int) enemyLocation.x);
 					rc.broadcast(12, (int) enemyLocation.y);
-				}else{
+				} else {
 					rc.broadcast(10, -1);
 				}
 
 				// Generate a random direction
 				// Randomly attempt to build a gardener in this direction
-				if (rc.canHireGardener(dir)&&nearby_gardeners<5&&rand256()<200) {
+				if (rc.canHireGardener(dir) && nearby_gardeners < 5 && rand256() < 200) {
 					rc.hireGardener(dir);
 				}
 
-				if (round>100&&!rc.hasMoved()&&round%4==0){
-						dir = randomDirection();
-						tryMove(dir);
+				if (round > 100 && !rc.hasMoved() && round % 4 == 0) {
+					dir = randomDirection();
+					tryMove(dir);
 
-					}
+				}
 
 				if (rc.getTeamBullets() > 200)
-					rc.donate(rc.getTeamBullets()/3);
+					rc.donate(rc.getTeamBullets() / 3);
 
 				// Clock.yield() makes the robot wait until the next turn, then
 				// it will perform this loop again
@@ -501,7 +499,7 @@ public strictfp class RobotPlayer {
 				myLocation = rc.getLocation();
 				dodge();
 
-				if (rc.readBroadcast(10) != -1&&!rc.hasMoved()) {
+				if (rc.readBroadcast(10) != -1 && !rc.hasMoved()) {
 					int x = rc.readBroadcast(11);
 					int y = rc.readBroadcast(12);
 					tryMove(new Direction(x - myLocation.x, y - myLocation.y));
@@ -683,7 +681,7 @@ public strictfp class RobotPlayer {
 		// This corresponds to the smallest radius circle centered at our
 		// location that would intersect with the
 		// line that is the path of the bullet.
-		float perpendicularDist = (float) Math.abs(distToRobot * xsin(theta)); // soh
+		float perpendicularDist = (float) Math.abs(distToRobot * Math.sin(theta)); // soh
 		// cah
 		// toa
 		// :)

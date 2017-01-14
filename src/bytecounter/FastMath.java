@@ -25,62 +25,48 @@ public class FastMath {
 
 	// call FastMath.initRand(rc) before using FastMath.rand256()
 	private static int randIndex = -1;
-	public static final int MAX_RAND_CALLS = 10000; // don't call rand256 more than this many times per game
+	public static final int MAX_RAND_CALLS = 10000; // don't call rand256 more
+													// than this many times per
+													// game
+
 	public static void initRand(RobotController rc) {
-		randIndex = Math.abs(rc.getRoundNum()*23981 + rc.getID()*10289) % 
-				(lookupRand256.length() - MAX_RAND_CALLS);
+		randIndex = Math.abs(rc.getRoundNum() * 23981 + rc.getID() * 10289) % (lookupRand256.length() - MAX_RAND_CALLS);
 	}
 
 	// faster version of (int)(256 * Math.random())
-	// costs ~10 bytecodes 
-	// while Random.nextInt(256) is ~50 bytecodes and (int)(256*Math.random()) is ~75 bytecodes
+	// costs ~10 bytecodes
+	// while Random.nextInt(256) is ~50 bytecodes and (int)(256*Math.random())
+	// is ~75 bytecodes
 	// Could also make other versions with a smaller upper limit
 	public static int rand256() {
 		return lookupRand256.charAt(randIndex++);
 	}
-	static double xsin (double x) {
-		double x2 = x * x;
-		return ((((.00015148419 * x2
-				- .00467376557) * x2
-				+ .07968967928) * x2
-				- .64596371106) * x2
-				+ 1.57079631847) * x;
-	}
 
 	// Generate and test the lookup strings
-	/*public static void main(String[] args) {
-		// generate strings
-		int[] dataFloorSqrt = new int[32000];
-		for (int i = 0; i < dataFloorSqrt.length; ++i) dataFloorSqrt[i] = (int)Math.sqrt(i);
-		writeLookupString("lookupFloorSqrt", dataFloorSqrt);
-		int[] dataRoundSqrt = new int[32000];
-		for (int i = 0; i < dataRoundSqrt.length; ++i) dataRoundSqrt[i] = (int)Math.round(Math.sqrt(i));
-		writeLookupString("lookupRoundSqrt", dataRoundSqrt);
-
-		int[] dataRand256 = new int[32000];
-		java.util.Random rand = new java.util.Random(new java.util.Date().getTime());
-		for (int i = 0; i < dataRand256.length; ++i) dataRand256[i] = rand.nextInt(256);
-		writeLookupString("lookupRand256", dataRand256);
-
-		// test strings
-		for (int i = 0; i < lookupFloorSqrt.length(); ++i) {
-			if (FastMath.floorSqrt(i) != (int)Math.sqrt(i)) {
-				System.out.format("floorSqrt failed for i = %d\n", i);
-				System.exit(-1);
-			}
-			if (FastMath.roundSqrt(i) != (int)Math.round(Math.sqrt(i))) {
-				System.out.format("roundSqrt failed for i = %d\n", i);
-				System.exit(-1);
-			}
-		}
-		System.out.println("Sqrt strings passed tests\n");
-	}
-
- private static void writeLookupString(String name, int[] data) {
-		System.out.format("public static final String %s = \"", name);
-		for (int i = 0; i < data.length; ++i) {
-			System.out.format("\\%s", Integer.toOctalString(data[i]));			
-		}
-		System.out.println("\";\n");
- }*/
+	/*
+	 * public static void main(String[] args) { // generate strings int[]
+	 * dataFloorSqrt = new int[32000]; for (int i = 0; i < dataFloorSqrt.length;
+	 * ++i) dataFloorSqrt[i] = (int)Math.sqrt(i);
+	 * writeLookupString("lookupFloorSqrt", dataFloorSqrt); int[] dataRoundSqrt
+	 * = new int[32000]; for (int i = 0; i < dataRoundSqrt.length; ++i)
+	 * dataRoundSqrt[i] = (int)Math.round(Math.sqrt(i));
+	 * writeLookupString("lookupRoundSqrt", dataRoundSqrt);
+	 * 
+	 * int[] dataRand256 = new int[32000]; java.util.Random rand = new
+	 * java.util.Random(new java.util.Date().getTime()); for (int i = 0; i <
+	 * dataRand256.length; ++i) dataRand256[i] = rand.nextInt(256);
+	 * writeLookupString("lookupRand256", dataRand256);
+	 * 
+	 * // test strings for (int i = 0; i < lookupFloorSqrt.length(); ++i) { if
+	 * (FastMath.floorSqrt(i) != (int)Math.sqrt(i)) {
+	 * System.out.format("floorSqrt failed for i = %d\n", i); System.exit(-1); }
+	 * if (FastMath.roundSqrt(i) != (int)Math.round(Math.sqrt(i))) {
+	 * System.out.format("roundSqrt failed for i = %d\n", i); System.exit(-1); }
+	 * } System.out.println("Sqrt strings passed tests\n"); }
+	 * 
+	 * private static void writeLookupString(String name, int[] data) {
+	 * System.out.format("public static final String %s = \"", name); for (int i
+	 * = 0; i < data.length; ++i) { System.out.format("\\%s",
+	 * Integer.toOctalString(data[i])); } System.out.println("\";\n"); }
+	 */
 }
