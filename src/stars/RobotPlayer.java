@@ -42,7 +42,15 @@ public strictfp class RobotPlayer {
 				try {
 					myLocation = rc.getLocation();
 					if (rc.getRobotCount() < 2) {
-						rc.buildRobot(RobotType.GARDENER, Direction.getWest());
+						if (rc.canBuildRobot(RobotType.GARDENER, Direction.getWest()))
+							rc.buildRobot(RobotType.GARDENER, Direction.getWest());
+						else if (rc.canBuildRobot(RobotType.GARDENER, Direction.getNorth()))
+							rc.buildRobot(RobotType.GARDENER, Direction.getNorth());
+						else if (rc.canBuildRobot(RobotType.GARDENER, Direction.getSouth()))
+							rc.buildRobot(RobotType.GARDENER, Direction.getSouth());
+						else if (rc.canBuildRobot(RobotType.GARDENER, Direction.getEast()))
+							rc.buildRobot(RobotType.GARDENER, Direction.getEast());
+
 					} else {
 						return;
 					}
@@ -53,7 +61,6 @@ public strictfp class RobotPlayer {
 				}
 			}
 		}
-		
 
 	}
 
