@@ -54,18 +54,12 @@ public class Scout {
 
 				if (robots.length > 0) {
 					closest = 0;
-					min = 10000000;
 					boolean target = false;
 					RobotInfo enemyGardener;
 					for (int x = 0; x < robots.length; x++) {
 						RobotInfo bot = robots[x];
 						if (bot.getType().equals(RobotType.GARDENER)) {
-
-							float temp = myLoc.distanceTo(bot.location);
-							if (temp < min) {
-								closest = x;
-								min = temp;
-							}
+							closest = x;
 							target = true;
 						}
 

@@ -12,14 +12,14 @@ public strictfp class RobotPlayer {
 		if (rc.getTeam().equals(Team.B)) {
 			int count = 0;
 			double ans = 0;
-			for (double x = 0; x < 1; x++) {
+			for (double x = -3.1; x < 3.1; x+=.1) {
 				Clock.yield();
-				// ans = FastMath.xsin(x);
+				ans = Math.abs(x);
 				count = Clock.getBytecodeNum();
 				System.out.println("F: " + x + ", " + ans + ", " + count);
 
 				Clock.yield();
-				// ans = Math.sin(x);
+				ans = Double.longBitsToDouble(Double.doubleToRawLongBits(x) & 0x7FFFFFFFFFFFl);
 				count = Clock.getBytecodeNum();
 				System.out.println("N: " + x + ", " + ans + ", " + count);
 
