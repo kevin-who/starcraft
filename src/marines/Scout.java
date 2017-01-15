@@ -11,18 +11,19 @@ import battlecode.common.TreeInfo;
 
 public class Scout {
 
-	MapLocation myLocation;
+	MapLocation myLoc;
 	RobotController rc;
 
 	void run() {
 		Team team = rc.getTeam();
 		Team enemy = team.opponent();
-		myLocation = rc.getLocation();
+		myLoc = rc.getLocation();
+		Global.loc = myLoc;
 		MapLocation[] enemies = rc.getInitialArchonLocations(enemy);
 		int closest = 0;
 		float min = 10000000;
 		for (int e = 0; e < enemies.length; e++) {
-			float temp = myLocation.distanceTo(enemies[e]);
+			float temp = myLoc.distanceTo(enemies[e]);
 			if (temp < min) {
 				closest = e;
 				min = temp;
@@ -34,15 +35,15 @@ public class Scout {
 
 		// The code you want your robot to perform every round should be in this
 		// loop
-		Direction dir = myLocation.directionTo(enemyBase);
+		Direction dir = myLoc.directionTo(enemyBase);
 
 		while (true) {
 
 			// Try/catch blocks stop unhandled exceptions, which cause your
 			// robot to explode
 			try {
-				myLocation = rc.getLocation();
-				Global.loc = myLocation;
+				myLoc = rc.getLocation();
+				Global.loc = myLoc;
 
 				if (!rc.hasMoved()) {
 					Global.dodge();
@@ -60,7 +61,7 @@ public class Scout {
 						RobotInfo bot = robots[x];
 						if (bot.getType().equals(RobotType.GARDENER)) {
 
-							float temp = myLocation.distanceTo(bot.location);
+							float temp = myLoc.distanceTo(bot.location);
 							if (temp < min) {
 								closest = x;
 								min = temp;
@@ -72,12 +73,12 @@ public class Scout {
 					if (target) {
 						enemyGardener = robots[closest];
 						MapLocation gardenerLocation = enemyGardener.getLocation();
-						Direction toGardener = myLocation.directionTo(gardenerLocation);
+						Direction toGardener = myLoc.directionTo(gardenerLocation);
 						if (!rc.hasMoved())
 							Global.goTo(gardenerLocation);
 
-						myLocation = rc.getLocation();
-						toGardener = myLocation.directionTo(gardenerLocation);
+						myLoc = rc.getLocation();
+						toGardener = myLoc.directionTo(gardenerLocation);
 						if (rc.canFireSingleShot()) {
 							rc.fireSingleShot(toGardener);
 						}
@@ -85,7 +86,7 @@ public class Scout {
 						toBase = false;
 					} else {
 						MapLocation enemyLocation = robots[0].getLocation();
-						Direction toEnemy = myLocation.directionTo(enemyLocation);
+						Direction toEnemy = myLoc.directionTo(enemyLocation);
 
 						rc.broadcast(2, rc.getRoundNum());
 						rc.broadcast(3, (int) enemyLocation.x);
@@ -93,8 +94,8 @@ public class Scout {
 
 						if (!rc.hasMoved()) {
 							Global.tryMove(toEnemy.opposite().rotateLeftDegrees(45));
-							myLocation = rc.getLocation();
-							toEnemy = myLocation.directionTo(enemyLocation);
+							myLoc = rc.getLocation();
+							toEnemy = myLoc.directionTo(enemyLocation);
 						}
 						if (rc.canFireSingleShot()) {
 							rc.fireSingleShot(toEnemy);
@@ -104,7 +105,7 @@ public class Scout {
 				}
 				if (!rc.hasMoved() && move) {
 					if (toBase)
-						Global.tryMove(dir, 0, 0);
+						Global.goTo(enemyBase);
 					else if (!Global.tryMove(dir, 0, 0)) {
 						dir = Global.rndDir();
 					}
