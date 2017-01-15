@@ -39,8 +39,10 @@ public class Gardener {
 			// robot to explode
 			try {
 				myLoc = rc.getLocation();
+				Global.loc = myLoc;
 
-				if (scout && rc.getRoundNum() < 100 && rc.getTeamBullets() > RobotType.SCOUT.bulletCost) {
+				if (scout && (rc.getRoundNum() < 100 && rc.getRobotCount() <= 2 * enemies.length)
+						&& rc.getTeamBullets() > RobotType.SCOUT.bulletCost) {
 					dir = Global.rndDir();
 					for (int x = 0; x < 18; x++) {
 						dir = dir.rotateLeftDegrees(20);
@@ -53,14 +55,15 @@ public class Gardener {
 				}
 
 				if (count < 30 && start.distanceTo(myLoc) < 7) {
-					Global.tryMove(myLoc.directionTo(enemyLocation), 30, 6);
+					Global.goTo(enemyLocation);
+					;
 					count++;
 				} else {
-					if (rc.isCircleOccupiedExceptByThisRobot(myLoc, 5) && rc.senseNearbyTrees(3.5f).length < 1) {
+					if (rc.isCircleOccupiedExceptByThisRobot(myLoc, 4) && rc.senseNearbyTrees(3.5f).length < 1) {
 						break;
 					}
 
-					if (rc.senseNearbyRobots(5).length < 1 && rc.senseNearbyTrees(3.5f, rc.getTeam()).length < 1) {
+					if (rc.senseNearbyRobots(4).length < 1 && rc.senseNearbyTrees(3.5f, rc.getTeam()).length < 1) {
 						dir = Global.rndDir();
 						if (rc.getTeamBullets() > RobotType.LUMBERJACK.bulletCost) {
 							for (int x = 0; x < 18; x++) {
@@ -75,7 +78,7 @@ public class Gardener {
 								break;
 							}
 						}
-					} else if (!rc.hasMoved() && !Global.tryMove(dir, 20, 10) && rc.senseNearbyRobots(5f).length < 1) {
+					} else if (!rc.hasMoved() && !Global.tryMove(dir, 20, 10) && rc.senseNearbyRobots(4f).length < 1) {
 						if (rc.getTeamBullets() > RobotType.LUMBERJACK.bulletCost) {
 							for (int x = 0; x < 18; x++) {
 								dir = dir.rotateLeftDegrees(20);

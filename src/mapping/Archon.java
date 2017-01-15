@@ -59,7 +59,7 @@ public class Archon {
 				dir = myLocation.directionTo(enemyLocation);
 				if (rc.getRobotCount() < 2 * number && rc.canHireGardener(dir)) {
 					rc.hireGardener(dir);
-				} else if (rc.canHireGardener(dir) && rc.getTreeCount() > 1 && FastMath.rand256() < 30) {
+				} else if (rc.canHireGardener(dir) && (rc.getTreeCount() > 1||rc.getRoundNum()>200) && FastMath.rand256() < 30) {
 					rc.hireGardener(dir);
 				}
 

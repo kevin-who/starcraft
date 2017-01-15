@@ -7,6 +7,7 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
+import battlecode.common.TreeInfo;
 
 public class Scout {
 
@@ -98,6 +99,7 @@ public class Scout {
 						if (rc.canFireSingleShot()) {
 							rc.fireSingleShot(toEnemy);
 						}
+						toBase = false;
 					}
 				}
 				if (!rc.hasMoved() && move) {
@@ -105,6 +107,16 @@ public class Scout {
 						Global.tryMove(dir, 0, 0);
 					else if (!Global.tryMove(dir, 0, 0)) {
 						dir = Global.rndDir();
+					}
+				}
+
+				TreeInfo[] ti = rc.senseNearbyTrees(-1, Team.NEUTRAL);
+				if (ti.length > 0) {
+					for (TreeInfo t : ti) {
+						if (rc.canShake(t.ID)) {
+							rc.shake(t.ID);
+							break;
+						}
 					}
 				}
 

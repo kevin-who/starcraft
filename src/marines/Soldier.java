@@ -5,7 +5,6 @@ import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
 import battlecode.common.Team;
 import battlecode.common.TreeInfo;
 
@@ -48,7 +47,8 @@ public class Soldier {
 					rc.broadcast(2, rc.getRoundNum());
 					rc.broadcast(3, (int) enemyLocation.x);
 					rc.broadcast(4, (int) enemyLocation.y);
-					Global.goTo(enemyLocation);
+					if (!rc.hasMoved())
+						Global.goTo(enemyLocation);
 
 					myLoc = rc.getLocation();
 					Direction toEnemy = myLoc.directionTo(enemyLocation);

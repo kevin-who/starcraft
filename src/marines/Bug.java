@@ -87,7 +87,7 @@ public strictfp class Bug {
 		if (isRobot) {
 			dir = rndDir();
 			rc.setIndicatorLine(loc, loc.add(dir), 128, 128, 128);
-			for (int i = 0; i < 6; i++) {
+			for (int i = 0; i < 4; i++) {
 				dir = dir.rotateLeftDegrees(90);
 				rc.setIndicatorLine(loc, loc.add(dir), 0, 0, 128);
 				if (tryMove(dir)) {

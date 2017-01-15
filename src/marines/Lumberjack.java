@@ -114,12 +114,11 @@ public class Lumberjack {
 					if (robots.length > 0) {
 
 						MapLocation enemyLocation = robots[0].getLocation();
-						Direction toEnemy = myLoc.directionTo(enemyLocation);
 						rc.broadcast(2, rc.getRoundNum());
 						rc.broadcast(3, (int) enemyLocation.x);
 						rc.broadcast(4, (int) enemyLocation.y);
 						if (!rc.hasMoved())
-							Global.tryMove(toEnemy);
+							Global.goTo(enemyLocation);
 					} else {
 						trees = rc.senseNearbyTrees(-1);
 
